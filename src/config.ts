@@ -1,10 +1,10 @@
 export const SITE = {
-  website: "https://astro-paper.pages.dev/", // replace this with your deployed domain
-  author: "Sat Naing",
+  website: "https://lhasa.icu/", // replace this with your deployed domain
+  author: "游钓四方",
   profile: "https://satnaing.dev/",
-  desc: "A minimal, responsive and SEO-friendly Astro blog theme.",
+  desc: "千禧年小孩，长途骑行小学生、野钓路亚、振出并继、古典乐、茶叶爱好者",
   title: "lhasa",
-  ogImage: "astropaper-og.jpg",
+  ogImage: "https://cos.lhasa.icu/StylePictures/my-photo.jpg",
   lightAndDarkMode: true,
   postPerIndex: 4,
   postPerPage: 4,
