@@ -160,6 +160,54 @@ const nextPost =
         )
       }
     </div>
+
+    <div id="comment"></div>
+    <script define:vars={{
+      postId: post.id,
+      postPageUrl: Astro.href,
+      disqusForum: '游钓四方_',
+      disqusApi: 'https://disqus.lhasa.icu',
+      disqusSite: 'https://lhasa.icu'
+      }} is:inline>
+      function initializeDisqus() {
+        if (typeof iDisqus === 'function') {
+          new iDisqus('comment', {
+            forum: disqusForum,
+            api: disqusApi,
+            site: disqusSite,
+            identifier: postId,
+            url: postPageUrl,
+            mode: 2,
+            init: true,
+          });
+        } else {
+          console.log('window.iDisqus:', window.iDisqus);
+        }
+      }
+      document.addEventListener('DOMContentLoaded', initializeDisqus);
+      document.addEventListener('astro:after-swap', () => {
+        const commentContainer = document.getElementById('comment');
+        if (commentContainer) {
+          commentContainer.innerHTML = '';
+        }
+        initializeDisqus();
+      });
+    </script>
+
+    <!-- <script is:inline>
+        function loadDisqusScript() {
+          if (!document.querySelector('script[src="https://cos.lhasa.icu/dist/iDisqus.min.js"]')) {
+            const script = document.createElement('script');
+              script.src = 'https://cos.lhasa.icu/dist/iDisqus.min.js';
+              script.async = true;
+              document.body.appendChild(script);
+          }
+        }
+        document.addEventListener('DOMContentLoaded', loadDisqusScript);
+        document.addEventListener('astro:after-swap', loadDisqusScript);
+    </script> -->
+
+
   </main>
   <Footer />
 </Layout>
