@@ -26,6 +26,9 @@ export default defineConfig({
     optimizeDeps: {
       exclude: ["@resvg/resvg-js"],
     },
+    server: {
+      allowedHosts: ["blog.lhasa.icu"],
+    },
   },
 //   image: {
 //     // Used for all Markdown images; not configurable per-image

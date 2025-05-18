@@ -161,8 +161,8 @@ const nextPost =
       }
     </div>
     
-    <link href="https://cdn.jsdelivr.net/npm/artalk@2.7.2/dist/Artalk.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/artalk@2.7.2/dist/Artalk.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/artalk@2.9.1/dist/Artalk.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/artalk@2.9.1/dist/Artalk.min.js"></script>
 
     <div id="Comments"></div>
 
@@ -170,8 +170,7 @@ const nextPost =
   <Footer />
 </Layout>
 
-<script is:inline>
-  console.log("准备加载 Artalk");
+<script is:inline data-astro-rerun>
   window.addEventListener("DOMContentLoaded", function () {
     if (window.Artalk) {
       Artalk.init({
