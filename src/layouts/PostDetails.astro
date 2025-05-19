@@ -160,32 +160,19 @@ const nextPost =
         )
       }
     </div>
-    
-    <link href="https://cdn.jsdelivr.net/npm/artalk@2.9.1/dist/Artalk.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/artalk@2.9.1/dist/Artalk.min.js"></script>
-
+    <br/>
     <div id="Comments"></div>
-
   </main>
   <Footer />
 </Layout>
-
 <script is:inline data-astro-rerun>
-  window.addEventListener("DOMContentLoaded", function () {
-    if (window.Artalk) {
-      Artalk.init({
-        el:        '#Comments',
-        pageKey:   '${post.id}',
-        server:    'https://admin.lhasa.icu',
-        site:      '游钓四方的博客',
-      });
-    } else {
-      console.error("Artalk is not loaded");
-    }
-  });
-</script>
-
-<script is:inline data-astro-rerun>
+  window.logDebug = function(message, url) {
+    console.log(
+      `%c[Artalk Debug] ${message} URL: %c${url}`,
+      "color: white; background: green; padding: 2px 6px; border-radius: 3px;",
+      "color: green; font-weight: bold;"
+    );
+  };
   /** Create a progress indicator
    *  at the top */
   function createProgressBar() {
@@ -305,4 +292,30 @@ const nextPost =
   document.addEventListener("astro:after-swap", () =>
     window.scrollTo({ left: 0, top: 0, behavior: "instant" })
   );
+
+  logDebug("准备加载", window.location.href);
+
+  document.addEventListener("astro:after-swap", () => {
+    // 避免多次初始化（可选）
+    if (document.querySelector('#Comments .atk-app')) return;
+    Artalk.init({
+      el: '#Comments',
+      pageKey: window.location.href,
+      server: 'https://admin.lhasa.icu',
+      site: '游钓四方的博客',
+    });
+    logDebug("切换加载完成",window.location.href);
+  });
+
+  // 如果首次加载页面也需要初始化（不是通过 astro 页面切换加载的情况）
+  document.addEventListener("DOMContentLoaded", () => {
+    if (document.querySelector('#Comments .atk-app')) return;
+    Artalk.init({
+      el: '#Comments',
+      pageKey: window.location.href,
+      server: 'https://admin.lhasa.icu',
+      site: '游钓四方的博客',
+    });
+    logDebug("初始加载完成",window.location.href);
+  });
 </script>
