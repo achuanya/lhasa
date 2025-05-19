@@ -2,6 +2,7 @@
 import { ClientRouter } from "astro:transitions";
 import { SITE } from "@/config";
 import "@/styles/global.css";
+import "@/styles/artalk.css";
 
 const googleSiteVerification = import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION;
 
@@ -128,7 +129,6 @@ const structuredData = {
 
     <ClientRouter />
     <script is:inline src="/toggle-theme.js"></script>
-    <link href="https://cos.lhasa.icu/assets/Artalk.min.css" rel="stylesheet">
     <script src="https://cos.lhasa.icu/assets/Artalk.min.js"></script>
 
   </head>
