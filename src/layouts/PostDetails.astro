@@ -166,13 +166,6 @@ const nextPost =
   <Footer />
 </Layout>
 <script is:inline data-astro-rerun>
-  window.logDebug = function(message, url) {
-    console.log(
-      `%c[Artalk Debug] ${message} URL: %c${url}`,
-      "color: white; background: green; padding: 2px 6px; border-radius: 3px;",
-      "color: green; font-weight: bold;"
-    );
-  };
   /** Create a progress indicator
    *  at the top */
   function createProgressBar() {
@@ -293,43 +286,32 @@ const nextPost =
     window.scrollTo({ left: 0, top: 0, behavior: "instant" })
   );
 
+  // Artalk
   (function() {
-    // 调试函数移到 IIFE 内部
-    window.logDebug = function(message, url) {
-      console.log(
-        `%c[Artalk Debug] ${message}%c URL: ${window.location.href}`,
-        "color: white; background: green; padding: 2px 6px; border-radius: 3px;",
-        "color: green; font-weight: bold;"
-      );
-    };
-
     // 单例模式存储 Artalk 实例
     window.artalkInstance = window.artalkInstance || null;
     const artalkConfig = {
       el: '#Comments',
       server: 'https://admin.lhasa.icu',
       site: '游钓四方的博客',
-      pageKey: window.location.href, // 直接使用当前 URL
-      darkMode: document.documentElement.classList.contains('dark'),
-      // 其他配置...
+      pageKey: window.location.href,
     };
 
-    // 增强的销毁方法
     function destroyArtalk() {
       if (window.artalkInstance) {
         try {
-          // 完整销毁流程
           window.artalkInstance.destroy();
           document.querySelectorAll('.atk-sidebar, .atk-layer-wrap').forEach(el => el.remove());
           window.artalkInstance = null;
-          logDebug("Artalk 实例已销毁");
+          console.log("Artalk 实例已销毁", window.location.href);
         } catch (err) {
           console.error("销毁失败:", err);
         }
       }
     }
 
-    // 增强的初始化方法
+    // 初始化 Artalk 实例
+    // 仅在目标容器存在时执行
     function initArtalk() {
       // 确保目标容器存在且无残留
       const container = document.getElementById('Comments');
@@ -341,7 +323,7 @@ const nextPost =
       
       // 创建新实例
       window.artalkInstance = Artalk.init(artalkConfig);
-      logDebug("Artalk 初始化完成");
+      console.log("Artalk 初始化完成", window.location.href);
     }
 
     // 页面生命周期管理
