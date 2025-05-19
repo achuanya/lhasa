@@ -309,6 +309,7 @@ const nextPost =
 
   // 如果首次加载页面也需要初始化（不是通过 astro 页面切换加载的情况）
   document.addEventListener("DOMContentLoaded", () => {
+    logDebug("初始加载完成",window.location.href);
     if (document.querySelector('#Comments .atk-app')) return;
     Artalk.init({
       el: '#Comments',
@@ -316,6 +317,5 @@ const nextPost =
       server: 'https://admin.lhasa.icu',
       site: '游钓四方的博客',
     });
-    logDebug("初始加载完成",window.location.href);
   });
 </script>
