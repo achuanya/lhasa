@@ -293,29 +293,39 @@ const nextPost =
     window.scrollTo({ left: 0, top: 0, behavior: "instant" })
   );
 
-  logDebug("准备加载", window.location.href);
-
-  document.addEventListener("astro:after-swap", () => {
-    // 避免多次初始化（可选）
+  function initArtalk() {
     if (document.querySelector('#Comments .atk-app')) return;
-    Artalk.init({
-      el: '#Comments',
-      pageKey: window.location.href,
-      server: 'https://admin.lhasa.icu',
-      site: '游钓四方的博客',
+    
+    const observer = new MutationObserver((mutations, obs) => {
+      const commentsEl = document.getElementById('Comments');
+      if (commentsEl && commentsEl.isConnected) {
+        Artalk.init({
+          el: '#Comments',
+          pageKey: window.location.href,
+          server: 'https://admin.lhasa.icu',
+          site: '游钓四方的博客',
+        });
+        logDebug("Artalk初始化成功", window.location.href);
+        obs.disconnect(); // 停止观察
+      }
     });
-    logDebug("切换加载完成",window.location.href);
-  });
 
-  // 如果首次加载页面也需要初始化（不是通过 astro 页面切换加载的情况）
-  document.addEventListener("DOMContentLoaded", () => {
-    logDebug("初始加载完成",window.location.href);
-    if (document.querySelector('#Comments .atk-app')) return;
-    Artalk.init({
-      el: '#Comments',
-      pageKey: window.location.href,
-      server: 'https://admin.lhasa.icu',
-      site: '游钓四方的博客',
+    // 开始观察document.body及其子节点的变化
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
     });
-  });
+  }
+
+  // 统一初始化入口
+  function setupArtalk() {
+    // 立即尝试初始化
+    initArtalk();
+    
+    // 同时保留原有事件监听作为后备
+    document.addEventListener('astro:after-swap', initArtalk);
+    document.addEventListener('DOMContentLoaded', initArtalk);
+  }
+
+  setupArtalk();
 </script>
