@@ -293,39 +293,81 @@ const nextPost =
     window.scrollTo({ left: 0, top: 0, behavior: "instant" })
   );
 
-  function initArtalk() {
-    if (document.querySelector('#Comments .atk-app')) return;
-    
-    const observer = new MutationObserver((mutations, obs) => {
-      const commentsEl = document.getElementById('Comments');
-      if (commentsEl && commentsEl.isConnected) {
-        Artalk.init({
-          el: '#Comments',
-          pageKey: window.location.href,
-          server: 'https://admin.lhasa.icu',
-          site: '游钓四方的博客',
-        });
-        logDebug("Artalk初始化成功", window.location.href);
-        obs.disconnect(); // 停止观察
+  (function() {
+    // 调试函数移到 IIFE 内部
+    window.logDebug = function(message, url) {
+      console.log(
+        `%c[Artalk Debug] ${message}%c URL: ${window.location.href}`,
+        "color: white; background: green; padding: 2px 6px; border-radius: 3px;",
+        "color: green; font-weight: bold;"
+      );
+    };
+
+    // 单例模式存储 Artalk 实例
+    window.artalkInstance = window.artalkInstance || null;
+    const artalkConfig = {
+      el: '#Comments',
+      server: 'https://admin.lhasa.icu',
+      site: '游钓四方的博客',
+      pageKey: window.location.href, // 直接使用当前 URL
+      darkMode: document.documentElement.classList.contains('dark'),
+      // 其他配置...
+    };
+
+    // 增强的销毁方法
+    function destroyArtalk() {
+      if (window.artalkInstance) {
+        try {
+          // 完整销毁流程
+          window.artalkInstance.destroy();
+          document.querySelectorAll('.atk-sidebar, .atk-layer-wrap').forEach(el => el.remove());
+          window.artalkInstance = null;
+          logDebug("Artalk 实例已销毁");
+        } catch (err) {
+          console.error("销毁失败:", err);
+        }
       }
-    });
+    }
 
-    // 开始观察document.body及其子节点的变化
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true
-    });
-  }
+    // 增强的初始化方法
+    function initArtalk() {
+      // 确保目标容器存在且无残留
+      const container = document.getElementById('Comments');
+      if (!container || container.querySelector('.atk-app')) return;
+      
+      // 更新配置中的动态参数
+      artalkConfig.pageKey = window.location.href;
+      artalkConfig.darkMode = document.documentElement.classList.contains('dark');
+      
+      // 创建新实例
+      window.artalkInstance = Artalk.init(artalkConfig);
+      logDebug("Artalk 初始化完成");
+    }
 
-  // 统一初始化入口
-  function setupArtalk() {
-    // 立即尝试初始化
-    initArtalk();
-    
-    // 同时保留原有事件监听作为后备
-    document.addEventListener('astro:after-swap', initArtalk);
-    document.addEventListener('DOMContentLoaded', initArtalk);
-  }
+    // 页面生命周期管理
+    function handlePageLoad() {
+      destroyArtalk();
+      initArtalk();
+    }
 
-  setupArtalk();
+    // 单次绑定事件监听
+    function setupArtalk() {
+      // 使用一次性初始化
+      if (window._artalkInitialized) return;
+      window._artalkInitialized = true;
+
+      // 页面切换事件
+      document.addEventListener('astro:before-swap', destroyArtalk);
+      document.addEventListener('astro:after-swap', handlePageLoad);
+      
+      // 初始加载
+      if (document.readyState === 'complete') {
+        handlePageLoad();
+      } else {
+        document.addEventListener('DOMContentLoaded', handlePageLoad);
+      }
+    }
+
+    setupArtalk();
+  })();
 </script>
