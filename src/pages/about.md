@@ -8,7 +8,7 @@ title: "About"
 
 ## 博主
 
-![游钓四方的骑行照](https://cos.lhasa.icu/StylePictures/my-photo.jpg_640 "游钓四方的骑行照")
+![游钓四方的骑行照](https://cos.lhasa.icu/StylePictures/my-photo.jpg "游钓四方的骑行照")
 
 长途骑行小学生、野钓路亚、振出并继、古典乐、茶叶爱好者
 
