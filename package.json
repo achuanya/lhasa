@@ -3,7 +3,6 @@
   "type": "module",
   "version": "5.2.0",
   "scripts": {
-    "disqus-php-api": "git+https://github.com/achuanya/disqus-php-api.git",
     "dev": "astro dev",
     "build": "astro check && astro build && pagefind --site dist && cp -r dist/pagefind public/",
     "preview": "astro preview",
@@ -20,7 +19,6 @@
     "@tailwindcss/vite": "^4.0.14",
     "astro": "^5.5.2",
     "dayjs": "^1.11.13",
-    "disqus-php-api": "github:achuanya/disqus-php-api",
     "lodash.kebabcase": "^4.1.1",
     "remark-collapse": "^0.1.2",
     "remark-toc": "^9.0.0",
