@@ -3,7 +3,7 @@ author: 游钓四方
 draft: false
 featured: false
 category: technology
-pubDatetime: 2018-08-24T12:44+08:00
+pubDatetime: 2018-09-24T12:44+08:00
 modDatetime: 2019-02-15T13:27+08:00
 title: Linux 命令笔记(长期更新)
 slug: linux-command
