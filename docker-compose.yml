@@ -1,4 +1,3 @@
-version: '3'
 services:
   artalk:
     image: artalk/artalk-go
