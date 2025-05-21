@@ -5,7 +5,7 @@ featured: false
 category: technology
 pubDatetime: 2019-05-06T08:34+08:00
 title: ionic 笔记 (环境搭建与命令)
-slug: West-Lake-Tour
+slug: ionic
 ogImage: https://cos.lhasa.icu/ArticlePictures/ionic.jpg
 tags:
   - ionic

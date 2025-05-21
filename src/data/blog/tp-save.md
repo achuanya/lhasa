@@ -2,10 +2,10 @@
 author: 游钓四方
 draft: false
 featured: false
-category: life
+category: technology
 pubDatetime: 2019-07-31T08:21+08:00
-title: 大年初一，徒步西湖
-slug: West-Lake-Tour
+title: ThinkPHP Save 方法引发的错误
+slug: tp-save
 ogImage: https://cos.lhasa.icu/ArticlePictures/ThinkPHP.jpg
 tags:
   - ThinkPHP
@@ -52,7 +52,6 @@ UPDATE `glbt_older_family` SET `older_id` = 31649,`name` = '阿川',`sex` = 2,`i
 出于好奇，反正来都来了，也瞅瞅Save的源码（这里感谢PHPSTORM的强大）
 
 ```php
-
 // Model.class.php
 public function save ( $data = '', $options = array() )
 {
