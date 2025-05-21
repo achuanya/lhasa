@@ -14,15 +14,17 @@ tags:
   - 开源
   - 独立开发者
 
-description:
-  晚上下了班打开电脑刚坐下就看到了一封 Google 邮件，首先看到了发件人 "Chrome Web Store"，当时就心想提交审核一个多星期了，终于看到一点音信了。点开后，还没等我高兴，便看到了.
+description: 晚上下了班打开电脑刚坐下就看到了一封 Google 邮件，首先看到了发件人 "Chrome Web Store"，当时就心想提交审核一个多星期了，终于看到一点音信了。点开后，还没等我高兴，便看到了.
 ---
 
-import Img from '@/components/Img.astro'; 
+import Img from "@/components/Img.astro";
 
 晚上下了班打开电脑刚坐下就看到了一封 Google 邮件，首先看到了发件人 "Chrome Web Store"，当时就心想提交审核一个多星期了，终于看到一点音信了。点开后，还没等我高兴，便看到了：
 
-<Img src={`${IMAGES}/EasyFillRejectionNotice.webp`} alt="Chrome 应用商店：EasyFill 被拒通知" />
+<Img
+  src={`${IMAGES}/EasyFillRejectionNotice.webp`}
+  alt="Chrome 应用商店：EasyFill 被拒通知"
+/>
 
 ## 解决BUG
 
@@ -31,13 +33,14 @@ import Img from '@/components/Img.astro';
 scripting 权限是 Manifest V3 中引入的一个重要权限，主要用于动态脚本执行`chrome.scripting.executeScript()`和动态样式注入`chrome.scripting.insertCSS()`
 
 而在`EasyFill`中，使用的是静态声明：
+
 ```js
 content_scripts: [
   {
-    matches: ['<all_urls>'],
-    js: ['content-scripts/content.js']
-  }
-]
+    matches: ["<all_urls>"],
+    js: ["content-scripts/content.js"],
+  },
+];
 ```
 
 删除`scripting`参数后，重新打包并再次向 Chrome Web Store 提交了扩展。

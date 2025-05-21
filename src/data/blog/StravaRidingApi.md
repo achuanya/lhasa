@@ -14,10 +14,8 @@ tags:
   - 开源
   - 独立开发者
 
-description:
-  该脚本基于 Strava API v3 获取指定用户当年的所有骑行活动数据，并将其保存为JSON格式
+description: 该脚本基于 Strava API v3 获取指定用户当年的所有骑行活动数据，并将其保存为JSON格式
 ---
-
 
 该脚本基于 Strava API v3 获取指定用户当年的所有骑行活动数据，并将其保存为JSON格式
 
@@ -49,21 +47,23 @@ Strava Riding Api 只实现了 OAuth 2.0 授权流程的部分自动化，由于
 ## 使用方法
 
 1. 安装依赖：
+
    ```
    yarn install
    ```
 
 2. 获取并处理授权码：
+
    ```
    yarn auth
    ```
+
    获取授权后，您会收到一个授权码。将其粘贴到命令行中。
 
 3. 获取骑行数据：
    ```
    yarn start
    ```
-   
 4. 查看输出的JSON文件，文件名格式为：`strava_data.json`
 
 ## 解决认证问题
@@ -71,9 +71,11 @@ Strava Riding Api 只实现了 OAuth 2.0 授权流程的部分自动化，由于
 如果您遇到API相关错误，请尝试以下解决方案：
 
 1. **更新令牌**：
+
    ```
    yarn auth
    ```
+
    重新获取授权并更新令牌
 
 2. **检查API状态**：
@@ -83,14 +85,16 @@ Strava Riding Api 只实现了 OAuth 2.0 授权流程的部分自动化，由于
 ## 常见问题解决
 
 1. **"protocol mismatch"错误**：
+
    - 此问题已在最新版本中解决，使用了原生HTTPS模块发送请求
    - 确保在Strava开发者设置中添加了`localhost`作为授权回调域
-   <br/><br/>
+     <br/><br/>
 
 2. **无法获取活动数据**：
+
    - 确认您的账户中确实有骑行活动
    - 检查筛选条件是否正确（默认只获取"Ride"类型活动）
-   <br/><br/>
+     <br/><br/>
 
 3. **API错误或限流**：
    - Strava API有使用限制(每15分钟100次，每天1000次)

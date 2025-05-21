@@ -160,7 +160,7 @@ const nextPost =
         )
       }
     </div>
-    <br/>
+    <br />
     <div id="Comments"></div>
   </main>
   <Footer />
@@ -287,15 +287,15 @@ const nextPost =
   );
 
   // Artalk
-    (function() {
+  (function () {
     // 单例模式存储 Artalk 实例
     window.artalkInstance = window.artalkInstance || null;
-    
+
     // 基本配置
     const artalkConfig = {
-      el: '#Comments',
-      server: 'https://admin.lhasa.icu',
-      site: '游钓四方的博客',
+      el: "#Comments",
+      server: "https://admin.lhasa.icu",
+      site: "游钓四方的博客",
       pageKey: window.location.href,
     };
 
@@ -303,7 +303,9 @@ const nextPost =
       if (window.artalkInstance) {
         try {
           window.artalkInstance.destroy();
-          document.querySelectorAll('.atk-sidebar, .atk-layer-wrap').forEach(el => el.remove());
+          document
+            .querySelectorAll(".atk-sidebar, .atk-layer-wrap")
+            .forEach(el => el.remove());
           window.artalkInstance = null;
           console.log("Artalk 实例已销毁", window.location.href);
         } catch (err) {
@@ -314,16 +316,17 @@ const nextPost =
 
     // 初始化 Artalk 实例
     function initArtalk() {
-      const container = document.getElementById('Comments');
-      if (!container || container.querySelector('.atk-app')) return;
-      
+      const container = document.getElementById("Comments");
+      if (!container || container.querySelector(".atk-app")) return;
+
       // 获取当前主题
-      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-      
+      const isDark =
+        document.documentElement.getAttribute("data-theme") === "dark";
+
       // 更新配置
       artalkConfig.pageKey = window.location.href;
       artalkConfig.darkMode = isDark;
-      
+
       // 创建新实例
       window.artalkInstance = Artalk.init(artalkConfig);
       console.log("Artalk 初始化完成", window.location.href);
@@ -331,13 +334,14 @@ const nextPost =
 
     // 监听主题切换
     function handleThemeChange() {
-      const themeBtn = document.querySelector('#theme-btn');
+      const themeBtn = document.querySelector("#theme-btn");
       if (!themeBtn) return;
 
-      const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-          if (mutation.attributeName === 'aria-label') {
-            const isDark = mutation.target.getAttribute('aria-label') === 'dark';
+      const observer = new MutationObserver(mutations => {
+        mutations.forEach(mutation => {
+          if (mutation.attributeName === "aria-label") {
+            const isDark =
+              mutation.target.getAttribute("aria-label") === "dark";
             if (window.artalkInstance) {
               window.artalkInstance.setDarkMode(isDark);
             }
@@ -347,11 +351,11 @@ const nextPost =
 
       observer.observe(themeBtn, {
         attributes: true,
-        attributeFilter: ['aria-label']
+        attributeFilter: ["aria-label"],
       });
     }
 
-    // 页面生命周期管理 
+    // 页面生命周期管理
     function handlePageLoad() {
       destroyArtalk();
       initArtalk();
@@ -364,22 +368,24 @@ const nextPost =
       window._artalkInitialized = true;
 
       // 页面切换事件
-      document.addEventListener('astro:before-swap', destroyArtalk);
-      document.addEventListener('astro:after-swap', handlePageLoad);
-      
+      document.addEventListener("astro:before-swap", destroyArtalk);
+      document.addEventListener("astro:after-swap", handlePageLoad);
+
       // 初始加载
-      if (document.readyState === 'complete') {
+      if (document.readyState === "complete") {
         handlePageLoad();
       } else {
-        document.addEventListener('DOMContentLoaded', handlePageLoad);
+        document.addEventListener("DOMContentLoaded", handlePageLoad);
       }
 
       // 监听系统主题变化
-      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', ({matches}) => {
-        if (window.artalkInstance) {
-          window.artalkInstance.setDarkMode(matches);
-        }
-      });
+      window
+        .matchMedia("(prefers-color-scheme: dark)")
+        .addEventListener("change", ({ matches }) => {
+          if (window.artalkInstance) {
+            window.artalkInstance.setDarkMode(matches);
+          }
+        });
     }
 
     setupArtalk();

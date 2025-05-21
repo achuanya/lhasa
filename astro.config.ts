@@ -5,8 +5,8 @@ import remarkToc from "remark-toc";
 import remarkCollapse from "remark-collapse";
 import { SITE } from "./src/config";
 import mdx from "@astrojs/mdx";
-import remarkMath from 'remark-math';
-import rehypeKatex from 'rehype-katex';
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
 
 // https://astro.build/config
 export default defineConfig({
@@ -37,7 +37,7 @@ export default defineConfig({
       allowedHosts: ["blog.lhasa.icu"],
     },
     define: {
-      'IMAGES': JSON.stringify("https://cos.lhasa.icu/ArticlePictures"),
+      IMAGES: JSON.stringify("https://cos.lhasa.icu/ArticlePictures"),
     },
   },
   image: {

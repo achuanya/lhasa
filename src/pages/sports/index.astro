@@ -18,9 +18,7 @@ const sortedPosts = getSortedPosts(posts);
   <Header />
   <Main pageTitle="Sports" pageDesc="All the articles about sports.">
     <ul>
-      {sortedPosts.map((post) => (
-        <Card {...post} />
-      ))}
+      {sortedPosts.map(post => <Card {...post} />)}
     </ul>
   </Main>
   <Footer />

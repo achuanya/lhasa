@@ -16,8 +16,7 @@ tags:
   - 开源
   - 独立开发者
 
-description:
-  4月24日，递交完辞职报告的那一刻，我心中一阵轻松。我终于可以离开了，离开熟悉的一切，前往下一个未知但让我心跳的地方——义乌.
+description: 4月24日，递交完辞职报告的那一刻，我心中一阵轻松。我终于可以离开了，离开熟悉的一切，前往下一个未知但让我心跳的地方——义乌.
 ---
 
 之前我写过一篇[《利用Go+Github Actions写个定时RSS爬虫》](https://lhasa.icu/GrabLatestRSS.html)来实现这一目的，主要是用 GitHub Actions + Go 进行持续的 RSS 拉取，再把结果上传到 GitHub Pages 站点
@@ -28,25 +27,25 @@ description:
 
 # 1. 为什么要重构
 
-旧版本主要基于 GitHub Actions 的定时触发，抓取完后把结果存放进 _data/rss_data.json 然后 Jekyll 就可以直接引用这个文件来展示订阅，但是这个方案有诸多不足:
+旧版本主要基于 GitHub Actions 的定时触发，抓取完后把结果存放进 \_data/rss_data.json 然后 Jekyll 就可以直接引用这个文件来展示订阅，但是这个方案有诸多不足:
 
 1. **网络不稳定导致的抓取失败**
 
-    由于原先的重试机制不够完善，GitHub Actions 在国外，RSS 站点大多在国内，一旦连接超时就挂，一些 RSS 无法成功抓取
+   由于原先的重试机制不够完善，GitHub Actions 在国外，RSS 站点大多在国内，一旦连接超时就挂，一些 RSS 无法成功抓取
 
 2. **单线程串行，速度偏慢**
 
-    旧版本一次只能串行抓取 RSS，效率低，数量稍多就拉长整体执行时间，再加上外网到内地的延时，更显迟缓
+   旧版本一次只能串行抓取 RSS，效率低，数量稍多就拉长整体执行时间，再加上外网到内地的延时，更显迟缓
 
 3. **日志不够完善**
 
-    出错时写到的日志文件只有大概的错误描述，无法区分是解析失败、头像链接失效还是RSS本身问题，排查不便
+   出错时写到的日志文件只有大概的错误描述，无法区分是解析失败、头像链接失效还是RSS本身问题，排查不便
 
 4. **访问速度影响大**
 
-    这是主要的重构原因！在旧版本里，抓取后的 JSON 数据是要存储到 Github 仓库的，虽然有 CDN 加持，但 GitHub Pages 的定时任务会引起连锁反应，当新内容刷新时容易出现访问延迟，极端情况下网页都挂了
+   这是主要的重构原因！在旧版本里，抓取后的 JSON 数据是要存储到 Github 仓库的，虽然有 CDN 加持，但 GitHub Pages 的定时任务会引起连锁反应，当新内容刷新时容易出现访问延迟，极端情况下网页都挂了
 
-    重构后，在此基础上进行了大幅重构，引入了并发抓取 + 指数退避重试 + GitHub/COS 双端存储的能力，抓取稳定性和页面访问速度都得到显著提升
+   重构后，在此基础上进行了大幅重构，引入了并发抓取 + 指数退避重试 + GitHub/COS 双端存储的能力，抓取稳定性和页面访问速度都得到显著提升
 
 # 2. 主要思路
 
@@ -84,7 +83,6 @@ description:
                | 6. 写日志到GitHub   |
                +--------------------+
 
-
 1. **并发抓取 + 限流**  
    通过 Go 的 goroutine 并发抓取 RSS，同时用一个 channel 来限制最大并发数
 
@@ -92,18 +90,19 @@ description:
    每个 RSS 如果第一次抓取失败，则会间隔几秒后再次重试，且间隔呈指数级递增（1s -> 2s -> 4s），最多重试三次，极大提高成功率
 
 3. **灵活存储**  
-    RSS_SOURCE: 可以决定从 COS 读取一个远程 txt 文件（里面存放 RSS 列表），或直接从 GitHub 的 data/rss.txt 读取<br/>
-    SAVE_TARGET: 可以把抓取结果上传到 GitHub，或者传到腾讯云 COS
+   RSS_SOURCE: 可以决定从 COS 读取一个远程 txt 文件（里面存放 RSS 列表），或直接从 GitHub 的 data/rss.txt 读取<br/>
+   SAVE_TARGET: 可以把抓取结果上传到 GitHub，或者传到腾讯云 COS
 
 4. **日志自动清理**  
    每次成功写入日志后，会检查 logs/ 目录下的日志文件，若超过 7 天就自动删除，避免日志越积越多
 
 ## 2.2 指数退避
+
 上一次写指数退避，还是在养老院写PHP的时候，时过境迁啊，这段算法我调试了很久，其实不难，也就是说失败一次，就等待更长的时间再重试，配置如下:
 
-* 最大重试次数: 3
-* 初始等待: 1秒
-* 等待倍数: 2.0
+- 最大重试次数: 3
+- 初始等待: 1秒
+- 等待倍数: 2.0
 
 也就是说失败一次就加倍等待，下次若依然失败就再加倍，如果三次都失败则放弃处理
 
@@ -273,27 +272,28 @@ for _, rssLink := range rssLinks {
 
 1. **容错率显著提升**
 
-    遇到网络抖动、超时等问题，能以10路并发限制式自动重试，很少出现直接拿不到数据
+   遇到网络抖动、超时等问题，能以10路并发限制式自动重试，很少出现直接拿不到数据
 
 2. **抓取速度更快**
 
-    以 10 路并发为例，对于数量多的 RSS，速度提升明显
+   以 10 路并发为例，对于数量多的 RSS，速度提升明显
 
 3. **日志分类更细**
 
-    分清哪条 RSS 是解析失败，哪条头像挂了，哪条本身有问题，后续维护比只给个403 Forbidden方便太多
+   分清哪条 RSS 是解析失败，哪条头像挂了，哪条本身有问题，后续维护比只给个403 Forbidden方便太多
 
 4. **支持 COS**
 
-    可将最终 data.json 放在 COS 上进行 CDN 加速；也能继续放在 GitHub，视自己需求而定
+   可将最终 data.json 放在 COS 上进行 CDN 加速；也能继续放在 GitHub，视自己需求而定
 
 5. **自动清理过期日志**
 
-    每次抓取后检查 logs/ 目录下 7 天之前的日志并删除，不用手工清理了
+   每次抓取后检查 logs/ 目录下 7 天之前的日志并删除，不用手工清理了
 
 # 4. Go 生成的 JSON 和日志长啥样
 
 ## 4.1 RSS
+
 抓取到的文章信息会按时间降序排列，示例:
 
 ```json
@@ -335,18 +335,20 @@ for _, rssLink := range rssLinks {
 
 如果你也想玩玩 LhasaRSS
 
-1. **准备一份 RSS 列表**（TXT）:
+1.  **准备一份 RSS 列表**（TXT）:
 
-    格式：每行一个 URL<br/>
-    如果 RSS_SOURCE = GITHUB，则可以放在项目中的 data/rss.txt<br/>
-    如果 RSS_SOURCE = COS，就把它上传到某个 https://xxx.cos.ap-xxx.myqcloud.com/rss.txt
-<br/><br/>
+        格式：每行一个 URL<br/>
+        如果 RSS_SOURCE = GITHUB，则可以放在项目中的 data/rss.txt<br/>
+        如果 RSS_SOURCE = COS，就把它上传到某个 https://xxx.cos.ap-xxx.myqcloud.com/rss.txt
 
-2. **配置好环境变量**:
+    <br/><br/>
 
-    默认所有数据保存到 Github，所以 COS API 环境变量不是必要的
-{% raw %}
-    ```yml
+2.  **配置好环境变量**:
+
+        默认所有数据保存到 Github，所以 COS API 环境变量不是必要的
+
+    {% raw %}
+    `yml
     env:
         TOKEN:                    ${{ secrets.TOKEN }}                    # GitHub Token
         NAME:                     ${{ secrets.NAME }}                     # GitHub 用户名
@@ -358,10 +360,10 @@ for _, rssLink := range rssLinks {
         DEFAULT_AVATAR:           ${{ secrets.DEFAULT_AVATAR }}           # 默认头像 URL
         RSS_SOURCE                ${{ secrets.RSS_SOURCE }}               # 可选参数 GITHUB or COS
         SAVE_TARGET               ${{ secrets.SAVE_TARGET }}              # 可选参数 GITHUB or COS
-    ```
-{% endraw %}<br/>
+    `
+    {% endraw %}<br/>
 
-3. **部署并运行**
+3.  **部署并运行**
 
     只需 go run . 或在 GitHub Actions workflow_dispatch 触发
     运行结束后，就会在 data 文件夹更新 data.json，日志则写进 GitHub logs/ 目录，并且自动清理旧日志
@@ -369,14 +371,15 @@ for _, rssLink := range rssLinks {
 注：如果你依旧想完全托管在 COS 上，需要把 RSS_SOURCE 和 SAVE_TARGET 都写为 COS，然后使用 GitHub Actions 去调度
 
 ## 相关文档
-* lhasaRSS:[https://github.com/achuanya/lhasaRSS][1]
-* 腾讯 Go SDK 快速入门: [https://cloud.tencent.com/document/product/436/31215][2]
-* XML Go SDK 源码: [https://github.com/tencentyun/cos-go-sdk-v5][3]
-* GitHub REST API: [https://docs.github.com/zh/rest][4]
-* 轻量级 RSS/Atom 解析库: [https://github.com/mmcdole/gofeed][5]
 
-[1]:https://github.com/achuanya/lhasaRSS
-[2]:https://cloud.tencent.com/document/product/436/31215
-[3]:https://github.com/tencentyun/cos-go-sdk-v5
-[4]:https://docs.github.com/zh/rest
-[5]:https://github.com/mmcdole/gofeed
+- lhasaRSS:[https://github.com/achuanya/lhasaRSS][1]
+- 腾讯 Go SDK 快速入门: [https://cloud.tencent.com/document/product/436/31215][2]
+- XML Go SDK 源码: [https://github.com/tencentyun/cos-go-sdk-v5][3]
+- GitHub REST API: [https://docs.github.com/zh/rest][4]
+- 轻量级 RSS/Atom 解析库: [https://github.com/mmcdole/gofeed][5]
+
+[1]: https://github.com/achuanya/lhasaRSS
+[2]: https://cloud.tencent.com/document/product/436/31215
+[3]: https://github.com/tencentyun/cos-go-sdk-v5
+[4]: https://docs.github.com/zh/rest
+[5]: https://github.com/mmcdole/gofeed
