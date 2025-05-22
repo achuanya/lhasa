@@ -1,7 +1,7 @@
 ---
 author: 游钓四方
-draft: false
-featured: true
+draft: true
+featured: false
 category: technology
 pubDatetime: 2025-05-22T14:25+08:00
 title: Docker + Ningx 构建 Astro 
@@ -15,9 +15,10 @@ tags:
 description: ....
 ---
 
+
 ## 配置 Nginx 支持 Astro 路由
 
-Nginx 需要添加一个 fallback 规则
+Astro 自带的 Vite 开发服务器，能自动处理前端路由重定向，但是Ningx不会。所以，Nginx 需要添加一个 fallback 规则
 ```nginx
 worker_processes 1;
 events {
