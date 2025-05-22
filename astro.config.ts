@@ -8,12 +8,9 @@ import mdx from "@astrojs/mdx";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 
-import node from "@astrojs/node";
-
 // https://astro.build/config
 export default defineConfig({
   site: SITE.website,
-
   integrations: [
     mdx({
       remarkPlugins: [remarkMath],
@@ -23,7 +20,6 @@ export default defineConfig({
       filter: page => SITE.showArchives || !page.endsWith("/archives"),
     }),
   ],
-
   markdown: {
     remarkPlugins: [remarkToc, [remarkCollapse, { test: "Table of contents" }]],
     shikiConfig: {
@@ -32,7 +28,6 @@ export default defineConfig({
       wrap: true,
     },
   },
-
   vite: {
     plugins: [tailwindcss()],
     optimizeDeps: {
@@ -45,18 +40,12 @@ export default defineConfig({
       IMAGES: JSON.stringify("https://cos.lhasa.icu/ArticlePictures"),
     },
   },
-
   image: {
     // Used for all Markdown images; not configurable per-image
     // Used for all `<Image />` and `<Picture />` components unless overridden with a prop
     experimentalLayout: "constrained",
   },
-
   experimental: {
     responsiveImages: true,
   },
-
-  adapter: node({
-    mode: "standalone",
-  }),
 });
