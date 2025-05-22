@@ -296,7 +296,7 @@ const nextPost =
       el: "#Comments",
       server: "https://artalk.lhasa.icu",
       site: "游钓四方的博客",
-      pageKey: window.location.href,
+      pageKey: window.location.pathname,
     };
 
     function destroyArtalk() {
@@ -307,7 +307,7 @@ const nextPost =
             .querySelectorAll(".atk-sidebar, .atk-layer-wrap")
             .forEach(el => el.remove());
           window.artalkInstance = null;
-          console.log("Artalk 实例已销毁", window.location.href);
+          console.log("Artalk 实例已销毁", window.location.pathname);
         } catch (err) {
           console.error("销毁失败:", err);
         }
@@ -324,12 +324,12 @@ const nextPost =
         document.documentElement.getAttribute("data-theme") === "dark";
 
       // 更新配置
-      artalkConfig.pageKey = window.location.href;
+      artalkConfig.pageKey = window.location.pathname;
       artalkConfig.darkMode = isDark;
 
       // 创建新实例
       window.artalkInstance = Artalk.init(artalkConfig);
-      console.log("Artalk 初始化完成", window.location.href);
+      console.log("Artalk 初始化完成", window.location.pathname);
     }
 
     // 监听主题切换

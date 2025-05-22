@@ -4,6 +4,7 @@ import Main from "@/layouts/Main.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import Card from "@/components/Card.astro";
+import LinkButton from "@/components/LinkButton.astro";
 import getSortedPosts from "@/utils/getSortedPosts";
 import { getCollection } from "astro:content";
 import { SITE } from "@/config";
@@ -11,15 +12,18 @@ import { SITE } from "@/config";
 const posts = await getCollection("blog", ({ data }) => {
   return !data.draft && data.category === "sports";
 });
-const sortedPosts = getSortedPosts(posts);
+const sortedPosts = getSortedPosts(posts).slice(0, SITE.postPerIndex);
 ---
 
 <Layout title={`Sports | ${SITE.title}`}>
   <Header />
-  <Main pageTitle="Sports" pageDesc="All the articles about sports.">
+  <Main pageTitle="Sports" pageDesc="">
     <ul>
       {sortedPosts.map(post => <Card {...post} />)}
     </ul>
+    <div class="my-8 text-center">
+      <LinkButton href="/sports/page/1">View All Sports Articles</LinkButton>
+    </div>
   </Main>
   <Footer />
 </Layout>
