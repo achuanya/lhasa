@@ -400,9 +400,9 @@ auth:
 # 界面配置
 frontend:
   # 评论框占位文字
-  placeholder: ""
+  placeholder: "牛逼的人都会说两句"
   # 无评论显示文字
-  noComment: ""
+  noComment: "牛逼的人都会说两句"
   # 发送按钮文字
   sendBtn: ""
   # 评论框穿梭

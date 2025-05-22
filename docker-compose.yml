@@ -13,10 +13,9 @@ services:
       - ./data:/data
 
   app:
-    image: node:lts
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: lhasa-app
     ports:
-      - 4321:4321
-    working_dir: /app
-    volumes:
-      - ./:/app
-    command: /bin/sh -c "npm install && npm run build && npm run preview -- --host 0.0.0.0"
+      - 4321:80
