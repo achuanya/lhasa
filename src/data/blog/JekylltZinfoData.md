@@ -6,7 +6,7 @@ category: technology
 pubDatetime: 2024-02-11T23:07+08:00
 title: 解决Jekyll时区数据源
 slug: JekylltZinfoData
-ogImage: https://cos.lhasa.icu/ArticlePictures/JekylltZinfoData.jpg
+ogImage: https://cos.lhasa.icu/ArticlePictures/JekylltZinfoData.png
 tags:
   - Jekyll
   - tzinfo-data
