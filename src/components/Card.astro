@@ -6,9 +6,10 @@ import Datetime from "./Datetime.astro";
 
 export interface Props extends CollectionEntry<"blog"> {
   variant?: "h2" | "h3";
+  showDescription?: boolean;
 }
 
-const { variant = "h2", data, id, filePath } = Astro.props;
+const { variant = "h2", data, id, filePath, showDescription = true } = Astro.props;
 
 const { title, description, pubDatetime, modDatetime, timezone, ogImage } = data;
 
@@ -20,11 +21,11 @@ const headerProps = {
 
 <li class="my-6 flex flex-row gap-6 items-start">
   {ogImage && (
-    <a href={getPath(id, filePath)} class="w-1/11 md:w-1/10 shrink-0">
+    <a href={getPath(id, filePath)} class="shrink-0">
       <img
         src={typeof ogImage === 'string' ? ogImage : (ogImage as any).src}
         alt={title}
-        class="w-full h-auto object-cover rounded-md aspect-square group-hover:opacity-90 transition-opacity duration-300"
+        class="w-[76px] sm:w-[81.78px] h-auto object-cover rounded-md aspect-square group-hover:opacity-90 transition-opacity duration-300"
       />
     </a>
   )}
@@ -42,11 +43,13 @@ const headerProps = {
       }
     </a>
     <Datetime pubDatetime={pubDatetime} modDatetime={modDatetime} timezone={timezone} />
-    <p class="mt-2 text-sm text-gray-700 dark:text-gray-300 hidden sm:block">
-      {description.length > 30
-        ? description.substring(0, 30) + "..."
-        : description}
-    </p>
+    {showDescription && (
+      <p class="mt-2 text-sm text-gray-700 dark:text-gray-300 hidden sm:block">
+        {description.length > 40
+          ? description.substring(0, 40) + "..."
+          : description}
+      </p>
+    )}
   </div>
 </li>
 
