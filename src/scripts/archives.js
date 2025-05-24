@@ -5,13 +5,41 @@ import timezone from 'dayjs/plugin/timezone';
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-const calendarIconSvg = `
-  <svg class="inline-block size-6 min-w-[1.375rem]" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect>
-    <line x1="16" x2="16" y1="2" y2="6"></line>
-    <line x1="8" x2="8" y1="2" y2="6"></line>
-    <line x1="3" x2="21" y1="10" y2="10"></line>
-  </svg>`;
+// 从 getPath 函数复制的路径生成逻辑
+function getPostPath(id, filePath) {
+  const BLOG_PATH = "src/data/blog";
+  
+  // 使用与 lodash.kebabcase 相同的逻辑
+  function slugifyStr(str) {
+    return str
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, '') // 移除特殊字符
+      .replace(/[\s_-]+/g, '-') // 将空格、下划线、连字符替换为单个连字符
+      .replace(/^-+|-+$/g, ''); // 移除开头和结尾的连字符
+  }
+
+  const pathSegments = filePath
+    ?.replace(BLOG_PATH, "")
+    .split("/")
+    .filter(path => path !== "") // remove empty string in the segments
+    .filter(path => !path.startsWith("_")) // exclude directories start with underscore "_"
+    .slice(0, -1) // remove the last segment (file name) since it's unnecessary
+    .map(segment => slugifyStr(segment)); // slugify each segment path
+
+  const basePath = "/posts";
+
+  // Making sure `id` does not contain the directory
+  const blogId = id.split("/");
+  const slug = blogId.length > 0 ? blogId.slice(-1) : blogId;
+
+  // If not inside the sub-dir, simply return the file path
+  if (!pathSegments || pathSegments.length < 1) {
+    return [basePath, slug].join("/");
+  }
+
+  return [basePath, ...pathSegments, slug].join("/");
+}
 
 function formatArchiveDate(dateString, tz) {
   if (!dateString) return { iso: '', date: '', time: '' };
@@ -29,10 +57,6 @@ function formatArchiveDate(dateString, tz) {
 
 function createArchiveCardHTML(post, siteTimezone) {
   const pubDate = formatArchiveDate(post.data.pubDatetime, siteTimezone);
-  const shortDescription = post.data.description && post.data.description.length > 100 
-    ? post.data.description.substring(0, 100) + "..." 
-    : post.data.description || '';
-
   const defaultImageClass = "w-[55px] h-[55px] object-cover rounded-md group-hover:opacity-90 transition-opacity duration-300";
 
   let imgSrc = '';
@@ -44,41 +68,44 @@ function createArchiveCardHTML(post, siteTimezone) {
     }
   }
 
+  // 使用正确的路径生成函数
+  const postPath = getPostPath(post.id, post.filePath);
+
   return `
-    <li class="my-6">
-      <a
-        href="/posts/${post.id}/"
-        class="group inline-block text-lg font-medium text-accent decoration-dashed underline-offset-4 focus-visible:no-underline focus-visible:underline-offset-0"
-      >
-        <div class="flex flex-row gap-4 items-start">
-          ${imgSrc ? `
-            <img
-              src="${imgSrc}"
-              alt="${post.data.title}"
-              class="${defaultImageClass}" 
-              loading="lazy"
-            />
-          ` : ''}
-          <div class="flex-grow">
-            <h3 class="text-lg font-medium decoration-dashed group-hover:underline">${post.data.title}</h3>
-            <div class="flex items-end space-x-2 opacity-80 mt-1">
-              ${calendarIconSvg}
-              <span class="sr-only">Published:</span>
-              <span class="text-sm italic">
-                <time datetime="${pubDate.iso}">${pubDate.date}</time>
-                <span aria-hidden="true"> | </span>
-                <span class="sr-only">&nbsp;at&nbsp;</span>
-                <span class="text-nowrap">${pubDate.time}</span>
-              </span>
-            </div>
-            ${shortDescription ? `
-              <p class="mt-2 text-sm text-gray-700 dark:text-gray-300 hidden sm:block">
-                ${shortDescription}
-              </p>
-            ` : ''}
-          </div>
+    <li class="my-6 flex flex-row gap-6 items-start">
+      ${imgSrc ? `
+        <a href="${postPath}" class="shrink-0">
+          <img
+            src="${imgSrc}"
+            alt="${post.data.title}"
+            class="${defaultImageClass} mx-auto my-auto" 
+            loading="lazy"
+          />
+        </a>
+      ` : ''}
+      <div class="flex-grow mx-auto my-auto">
+        <a
+          href="${postPath}"
+          class="inline-block text-lg font-medium text-accent decoration-dashed underline-offset-4 focus-visible:no-underline focus-visible:underline-offset-0"
+        >
+          <h3 class="text-lg font-medium decoration-dashed hover:underline" style="view-transition-name: ${post.data.title.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').replace(/^-+|-+$/g, '')}">${post.data.title}</h3>
+        </a>
+        <div class="flex items-end space-x-2 opacity-80">
+          <svg class="inline-block size-6 min-w-[1.375rem] scale-90" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect>
+            <line x1="16" x2="16" y1="2" y2="6"></line>
+            <line x1="8" x2="8" y1="2" y2="6"></line>
+            <line x1="3" x2="21" y1="10" y2="10"></line>
+          </svg>
+          <span class="sr-only">Published:</span>
+          <span class="text-sm italic">
+            <time datetime="${pubDate.iso}">${pubDate.date}</time>
+            <span aria-hidden="true"> | </span>
+            <span class="sr-only">&nbsp;at&nbsp;</span>
+            <span class="text-nowrap">${pubDate.time}</span>
+          </span>
         </div>
-      </a>
+      </div>
     </li>
   `;
 }
