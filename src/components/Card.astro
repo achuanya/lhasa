@@ -8,9 +8,10 @@ export interface Props extends CollectionEntry<"blog"> {
   variant?: "h2" | "h3";
   showDescription?: boolean;
   imageClass?: string;
+  fallbackOgImage?: string;
 }
 
-const { variant = "h2", data, id, filePath, showDescription = true, imageClass } = Astro.props;
+const { variant = "h2", data, id, filePath, showDescription = true, imageClass, fallbackOgImage } = Astro.props;
 
 const { title, description, pubDatetime, modDatetime, timezone, ogImage } = data;
 
@@ -20,16 +21,23 @@ const headerProps = {
 };
 
 const defaultImageClass = "w-[76px] sm:w-[81.78px] h-auto object-cover rounded-md aspect-square group-hover:opacity-90 transition-opacity duration-300";
+
+let imgSrc = typeof ogImage === 'string' ? ogImage : (ogImage as any)?.src;
+
+if ((!imgSrc || imgSrc.trim() === "") && fallbackOgImage) {
+  imgSrc = fallbackOgImage;
+}
 ---
 
 <li class="my-6 flex flex-row gap-6 items-start">
-  {ogImage && (
+  {imgSrc && (
     <a href={getPath(id, filePath)} class="shrink-0">
       <img
-        src={typeof ogImage === 'string' ? ogImage : (ogImage as any).src}
+        src={imgSrc}
         alt={title}
         class={imageClass || defaultImageClass}
         loading="lazy"
+        onerror={fallbackOgImage ? `this.onerror=null; this.src='${fallbackOgImage}';` : undefined}
       />
     </a>
   )}
