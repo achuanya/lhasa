@@ -73,15 +73,6 @@ const blogStats = await getBlogStats();
     requestAnimationFrame(updateNumber);
   }
 
-  // 检查元素是否接近视口（提前触发动画）
-  function isElementNearViewport(element: HTMLElement, threshold: number = 100): boolean {
-    const rect = element.getBoundingClientRect();
-    return (
-      rect.top <= (window.innerHeight || document.documentElement.clientHeight) + threshold &&
-      rect.bottom >= -threshold
-    );
-  }
-
   // 启动所有数字动画
   function startAnimations() {
     const statsData = document.getElementById('blog-stats-data');
@@ -115,45 +106,23 @@ const blogStats = await getBlogStats();
     });
   }
 
-  // 滚动懒加载逻辑
-  function setupLazyAnimation() {
-    const statsSection = document.querySelector('#about');
-    if (!statsSection) return;
-    
-    let animationTriggered = false;
-    
-    function checkAndTriggerAnimation() {
-      if (animationTriggered) return;
-      
-      if (isElementNearViewport(statsSection as HTMLElement, 200)) {
-        animationTriggered = true;
-        startAnimations();
-        // 移除事件监听器以避免重复触发
-        window.removeEventListener('scroll', checkAndTriggerAnimation);
-        window.removeEventListener('resize', checkAndTriggerAnimation);
-      }
-    }
-    
-    // 检查页面加载时是否已经在视口中
-    if (isElementNearViewport(statsSection as HTMLElement, 200)) {
+  // 页面加载完成后直接启动动画
+  function initializeAnimations() {
+    // 添加短暂延迟确保DOM完全渲染
+    setTimeout(() => {
       startAnimations();
-      animationTriggered = true;
-    } else {
-      // 添加滚动和窗口大小变化监听器
-      window.addEventListener('scroll', checkAndTriggerAnimation, { passive: true });
-      window.addEventListener('resize', checkAndTriggerAnimation, { passive: true });
-    }
+    }, 300);
   }
 
   // 初始化
   document.addEventListener('astro:page-load', () => {
-    setupLazyAnimation();
+    initializeAnimations();
   });
 
   // 兼容非Astro环境
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', setupLazyAnimation);
+    document.addEventListener('DOMContentLoaded', initializeAnimations);
   } else {
-    setupLazyAnimation();
+    initializeAnimations();
   }
 </script>
