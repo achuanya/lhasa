@@ -14,7 +14,7 @@ export const SITE = {
   editPost: {
     enabled: true,
     text: "Suggest Changes",
-    url: "https://github.com/satnaing/astro-paper/edit/main/",
+    url: "https://github.com/achuanya/lhasa/edit/main/",
   },
   dynamicOgImage: true,
   lang: "zh-CN",
