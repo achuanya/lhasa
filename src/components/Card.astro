@@ -7,9 +7,10 @@ import Datetime from "./Datetime.astro";
 export interface Props extends CollectionEntry<"blog"> {
   variant?: "h2" | "h3";
   showDescription?: boolean;
+  imageClass?: string;
 }
 
-const { variant = "h2", data, id, filePath, showDescription = true } = Astro.props;
+const { variant = "h2", data, id, filePath, showDescription = true, imageClass } = Astro.props;
 
 const { title, description, pubDatetime, modDatetime, timezone, ogImage } = data;
 
@@ -17,6 +18,8 @@ const headerProps = {
   style: { viewTransitionName: slugifyStr(title) },
   class: "text-lg font-medium decoration-dashed hover:underline",
 };
+
+const defaultImageClass = "w-[76px] sm:w-[81.78px] h-auto object-cover rounded-md aspect-square group-hover:opacity-90 transition-opacity duration-300";
 ---
 
 <li class="my-6 flex flex-row gap-6 items-start">
@@ -25,7 +28,7 @@ const headerProps = {
       <img
         src={typeof ogImage === 'string' ? ogImage : (ogImage as any).src}
         alt={title}
-        class="w-[76px] sm:w-[81.78px] h-auto object-cover rounded-md aspect-square group-hover:opacity-90 transition-opacity duration-300"
+        class={imageClass || defaultImageClass}
       />
     </a>
   )}
