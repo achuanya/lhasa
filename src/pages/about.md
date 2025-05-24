@@ -3,6 +3,8 @@ layout: ../layouts/AboutLayout.astro
 title: "About"
 ---
 
+自 <span id="start-year" class="font-bold text-accent">0</span> 年 <span id="start-month" class="font-bold text-accent">0</span> 月 <span id="start-day" class="font-bold text-accent">0</span> 日起，本站已运行 <span id="running-days" class="font-bold text-accent">0</span> 天，截至到今天，共写了博文 <span id="total-posts" class="font-bold text-accent">0</span> 篇，计 <span id="total-words" class="font-bold text-accent">0.0</span> 万字。
+
 鄙人博客采用:<a href="https://creativecommons.org/licenses/by-nc-nd/3.0/deed.zh-hans" target="_blank">CC BY-NC-ND 4.0</a>，转载请务必注明出处，谢谢。
 
 内容系本人学习、研究和总结，如有雷同，实属荣幸！
