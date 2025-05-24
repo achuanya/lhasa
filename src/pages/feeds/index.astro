@@ -3,7 +3,7 @@ import Layout from "@/layouts/Layout.astro";
 import Main from "@/layouts/Main.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
-import Card from "@/components/Card.astro";
+import Datetime from "@/components/Datetime.astro";
 import { SITE } from "@/config";
 
 interface FeedItem {
@@ -60,28 +60,45 @@ const feedsDataForClient = {
     {allFeedsData.items && allFeedsData.items.length > 0 ? (
       <section id="feeds-list-section" class="px-0">
         <ul id="feeds-list" class="list-none p-0">
-          {allFeedsData.items.slice(0, feedsDataForClient.initialItemCount).map(item => (
-            // @ts-ignore
-            <Card
-              data={{
-                title: item.title,
-                description: `来自 ${item.blog_name}`,
-                pubDatetime: new Date(item.published),
-                ogImage: item.avatar,
-                author: item.blog_name,
-                modDatetime: null,
-                featured: false,
-                draft: false,
-                tags: ["feed"],
-                category: "Feed",
-              }}
-              id={item.link}
-              filePath={item.link}
-              variant="h3"
-              showDescription={true}
-              fallbackOgImage={feedsDataForClient.fallbackOgImage}
-            />
-          ))}
+          {allFeedsData.items.slice(0, feedsDataForClient.initialItemCount).map(item => {
+            const imgSrc = item.avatar || FALLBACK_OG_IMAGE;
+            const description = `来自 ${item.blog_name}`;
+            const shortDescription = description.length > 40 ? description.substring(0, 40) + "..." : description;
+            
+            return (
+              <li class="my-6 flex flex-row gap-6 items-start">
+                {imgSrc && (
+                  <a href={item.link} target="_blank" rel="noopener noreferrer" class="shrink-0 mx-auto my-auto">
+                    <img
+                      src={imgSrc}
+                      alt={item.title}
+                      class="w-[76px] sm:w-[81.78px] h-auto object-cover rounded-md aspect-square group-hover:opacity-90 transition-opacity duration-300"
+                      loading="lazy"
+                      onerror={`this.onerror=null; this.src='${FALLBACK_OG_IMAGE}';`}
+                    />
+                  </a>
+                )}
+                <div class="flex-grow mx-auto my-auto">
+                  <a
+                    href={item.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="inline-block text-lg font-medium text-accent decoration-dashed underline-offset-4 focus-visible:no-underline focus-visible:underline-offset-0"
+                  >
+                    <h3 class="text-lg font-medium decoration-dashed hover:underline">{item.title}</h3>
+                  </a>
+                  <Datetime 
+                    pubDatetime={new Date(item.published)} 
+                    modDatetime={null} 
+                    timezone={SITE.timezone} 
+                  />
+                  <p class="mt-2 text-sm text-gray-700 dark:text-gray-300 hidden sm:block">
+                    {shortDescription}
+                  </p>
+                </div>
+              </li>
+            );
+          })}
         </ul>
         {allFeedsData.items.length > feedsDataForClient.initialItemCount && (
           <div id="load-more-trigger" class="h-10"></div>
