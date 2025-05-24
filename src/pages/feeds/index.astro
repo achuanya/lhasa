@@ -5,9 +5,6 @@ import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import Card from "@/components/Card.astro";
 import { SITE } from "@/config";
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
-import timezone from 'dayjs/plugin/timezone';
 
 interface FeedItem {
   blog_name: string;
@@ -23,6 +20,7 @@ interface FeedsData {
 }
 
 const INITIAL_ITEMS_TO_SHOW = 4;
+const FALLBACK_OG_IMAGE = "https://lhasa-1253887673.cos.ap-shanghai.myqcloud.com/LinksAvatar/default.png";
 
 let allFeedsData: FeedsData = { items: [], updated: "" };
 let errorFetching: string | null = null;
@@ -39,18 +37,23 @@ try {
   } else {
     errorFetching = "An unknown error occurred while fetching feeds.";
   }
-  console.error(errorFetching);
 }
 
-// 只传递初始部分数据进行服务端渲染
-const initialFeedItems = allFeedsData.items.slice(0, INITIAL_ITEMS_TO_SHOW);
+const feedsDataForClient = {
+  allFeeds: allFeedsData.items,
+  siteTimezone: SITE.timezone,
+  fallbackOgImage: FALLBACK_OG_IMAGE,
+  initialItemCount: INITIAL_ITEMS_TO_SHOW,
+  itemsPerPage: 4,
+};
 
 const pageTitle = "Feeds";
 ---
 
 <Layout title={`Feeds | ${SITE.title}`}>
   <Header />
-  <Main {pageTitle}>
+  <Main>
+    <h1 class="text-4xl font-bold mb-6">Feeds</h1>
     {errorFetching && (
       <div class="mb-4 rounded bg-red-100 p-4 text-red-700">
         <p>{errorFetching}</p>
@@ -59,12 +62,9 @@ const pageTitle = "Feeds";
     )}
     {allFeedsData.items && allFeedsData.items.length > 0 ? (
       <section id="feeds-list-section">
-        <p class="mb-4 text-sm text-gray-600 dark:text-gray-400">
-          最后更新于：{allFeedsData.updated}
-        </p>
         <ul id="feeds-list" class="list-none p-0">
-          {initialFeedItems.map(item => (
-            // @ts-ignore // Astro 可能会对动态属性有意见，但在Card内部处理
+          {allFeedsData.items.slice(0, feedsDataForClient.initialItemCount).map(item => (
+            // @ts-ignore
             <Card
               data={{
                 title: item.title,
@@ -82,11 +82,11 @@ const pageTitle = "Feeds";
               filePath={item.link}
               variant="h3"
               showDescription={true}
-              fallbackOgImage="https://lhasa-1253887673.cos.ap-shanghai.myqcloud.com/LinksAvatar/default.png"
+              fallbackOgImage={feedsDataForClient.fallbackOgImage}
             />
           ))}
         </ul>
-        {allFeedsData.items.length > INITIAL_ITEMS_TO_SHOW && (
+        {allFeedsData.items.length > feedsDataForClient.initialItemCount && (
           <div id="load-more-trigger" class="h-10"></div>
         )}
       </section>
@@ -97,130 +97,29 @@ const pageTitle = "Feeds";
   <Footer />
 </Layout>
 
-<script define:vars={{ allFeedsFromServer: allFeedsData.items, siteTimezone: SITE.timezone, fallbackOgImageGlobal: "https://lhasa-1253887673.cos.ap-shanghai.myqcloud.com/LinksAvatar/default.png", initialItemCount: INITIAL_ITEMS_TO_SHOW, itemsPerPage: 4 }}>
-  // Ensure Day.js is available (Astro might bundle it, or you might need to import it)
-  // For simplicity, assuming Day.js and its plugins (utc, timezone) are globally available or correctly imported by Astro.
-  // If not, you might need: import dayjs from 'dayjs'; import utc from 'dayjs/plugin/utc'; import timezone from 'dayjs/plugin/timezone';
-  // dayjs.extend(utc); dayjs.extend(timezone);
-  dayjs.extend(utc);
-  dayjs.extend(timezone);
+<div id="feeds-data-json-container" data-json={JSON.stringify(feedsDataForClient)} style="display: none;"></div>
 
-  const feedsListElement = document.getElementById('feeds-list');
-  const loadMoreTrigger = document.getElementById('load-more-trigger');
-  let currentIndex = initialItemCount;
+<script>
+  import { initFeeds } from '@/scripts/feeds.js';
 
-  const calendarIconSvg = `
-    <svg class="inline-block size-6 min-w-[1.375rem]" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect>
-      <line x1="16" x2="16" y1="2" y2="6"></line>
-      <line x1="8" x2="8" y1="2" y2="6"></line>
-      <line x1="3" x2="21" y1="10" y2="10"></line>
-    </svg>`;
+  document.addEventListener('astro:page-load', () => {
+    const dataElement = document.getElementById('feeds-data-json-container');
 
-  function formatFeedDate(dateString, tz) {
-    if (!dateString) return { iso: '', date: '', time: '' };
-    try {
-      // @ts-ignore
-      const datetime = dayjs(dateString).tz(tz || 'UTC');
-      return {
-        iso: datetime.toISOString(),
-        date: datetime.format('D MMM, YYYY'),
-        time: datetime.format('hh:mm A'),
-      };
-    } catch (e) {
-      console.error('Error formatting date:', dateString, e);
-      return { iso: '', date: 'Invalid Date', time: '' };
-    }
-  }
-
-  function createFeedCardHTML(item) {
-    const pubDate = formatFeedDate(item.published, siteTimezone);
-    const description = `来自 ${item.blog_name}`;
-    const shortDescription = description.length > 40 ? description.substring(0, 40) + "..." : description;
-
-    // Default Card classes for image, mimicking Card.astro's defaultImageClass
-    const defaultImageClass = "w-[76px] sm:w-[81.78px] h-auto object-cover rounded-md aspect-square group-hover:opacity-90 transition-opacity duration-300";
-
-    let imgSrc = item.avatar || '';
-    if ((!imgSrc || imgSrc.trim() === "") && fallbackOgImageGlobal) {
-      imgSrc = fallbackOgImageGlobal;
-    }
-    
-    const onerrorHandler = fallbackOgImageGlobal ? `this.onerror=null; this.src='${fallbackOgImageGlobal}';` : '';
-
-    return `
-      <li class="my-6 flex flex-row gap-6 items-start">
-        ${imgSrc ? `
-          <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="shrink-0">
-            <img
-              src="${imgSrc}"
-              alt="${item.title}"
-              class="${defaultImageClass}" 
-              loading="lazy"
-              onerror="${onerrorHandler}"
-            />
-          </a>
-        ` : ''}
-        <div class="flex-grow">
-          <a
-            href="${item.link}" target="_blank" rel="noopener noreferrer"
-            class="inline-block text-lg font-medium text-accent decoration-dashed underline-offset-4 focus-visible:no-underline focus-visible:underline-offset-0"
-          >
-            <h3 class="text-lg font-medium decoration-dashed hover:underline">${item.title}</h3>
-          </a>
-          <div class="flex items-end space-x-2 opacity-80 mt-1">
-            ${calendarIconSvg}
-            <span class="sr-only">Published:</span>
-            <span class="text-sm italic">
-              <time datetime="${pubDate.iso}">${pubDate.date}</time>
-              <span aria-hidden="true"> | </span>
-              <span class="sr-only">&nbsp;at&nbsp;</span>
-              <span class="text-nowrap">${pubDate.time}</span>
-            </span>
-          </div>
-          <p class="mt-2 text-sm text-gray-700 dark:text-gray-300 hidden sm:block">
-            ${shortDescription}
-          </p>
-        </div>
-      </li>
-    `;
-  }
-
-  function loadMoreItems() {
-    if (!feedsListElement) return;
-    const itemsToLoad = allFeedsFromServer.slice(currentIndex, currentIndex + itemsPerPage);
-    if (itemsToLoad.length === 0 && loadMoreTrigger) {
-      loadMoreTrigger.style.display = 'none'; // Hide trigger if no more items
-      if (observer) observer.disconnect();
-      return;
-    }
-
-    let newItemsHTML = '';
-    itemsToLoad.forEach(item => {
-      newItemsHTML += createFeedCardHTML(item);
-    });
-    feedsListElement.insertAdjacentHTML('beforeend', newItemsHTML);
-    currentIndex += itemsToLoad.length;
-
-    if (currentIndex >= allFeedsFromServer.length && loadMoreTrigger) {
-        loadMoreTrigger.style.display = 'none';
-        if(observer) observer.disconnect();
-    }
-  }
-
-  let observer;
-  if (loadMoreTrigger && allFeedsFromServer.length > initialItemCount) {
-    observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting) {
-        loadMoreItems();
+    if (dataElement && dataElement.dataset.json) {
+      try {
+        const clientData = JSON.parse(dataElement.dataset.json);
+        initFeeds(
+          clientData.allFeeds,
+          clientData.siteTimezone,
+          clientData.fallbackOgImage,
+          clientData.initialItemCount,
+          clientData.itemsPerPage
+        );
+      } catch (e) {
+        console.error("Failed to parse feeds client data or initialize feeds:", e);
       }
-    }, { threshold: 0.1 });
-    observer.observe(loadMoreTrigger);
-  } else if (loadMoreTrigger) {
-    // If there are no more items to load initially, hide the trigger
-    loadMoreTrigger.style.display = 'none';
-  }
-
+    }
+  });
 </script>
 
 <style>
