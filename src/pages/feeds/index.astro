@@ -20,7 +20,7 @@ interface FeedsData {
 }
 
 const INITIAL_ITEMS_TO_SHOW = 4;
-const FALLBACK_OG_IMAGE = "https://lhasa-1253887673.cos.ap-shanghai.myqcloud.com/LinksAvatar/default.png";
+const FALLBACK_OG_IMAGE = "https://cos.lhasa.icu/LinksAvatar/default.png";
 
 let allFeedsData: FeedsData = { items: [], updated: "" };
 let errorFetching: string | null = null;
@@ -58,7 +58,7 @@ const feedsDataForClient = {
       </div>
     )}
     {allFeedsData.items && allFeedsData.items.length > 0 ? (
-      <section id="feeds-list-section">
+      <section id="feeds-list-section" class="px-0">
         <ul id="feeds-list" class="list-none p-0">
           {allFeedsData.items.slice(0, feedsDataForClient.initialItemCount).map(item => (
             // @ts-ignore
@@ -120,5 +120,7 @@ const feedsDataForClient = {
 </script>
 
 <style>
-  /* 如果需要，可以在这里添加针对 Feeds 页面的特定样式 */
+  #feeds-list-section {
+    padding-inline: 0;
+  }
 </style>

@@ -45,7 +45,7 @@ function createFeedCardHTML(item, siteTimezone, fallbackOgImageGlobal) {
   return `
     <li class="my-6 flex flex-row gap-6 items-start">
       ${imgSrc ? `
-        <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="shrink-0">
+        <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="shrink-0 mx-auto">
           <img
             src="${imgSrc}"
             alt="${item.title}"
