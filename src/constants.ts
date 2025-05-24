@@ -1,35 +1,35 @@
 import IconMail from "@/assets/icons/IconMail.svg";
 import IconGitHub from "@/assets/icons/IconGitHub.svg";
 import IconBrandX from "@/assets/icons/IconBrandX.svg";
-import IconLinkedin from "@/assets/icons/IconLinkedin.svg";
 import IconWhatsapp from "@/assets/icons/IconWhatsapp.svg";
 import IconFacebook from "@/assets/icons/IconFacebook.svg";
 import IconTelegram from "@/assets/icons/IconTelegram.svg";
 import IconPinterest from "@/assets/icons/IconPinterest.svg";
+import IconDouyin from "@/assets/icons/IconDouyin.svg";
 import { SITE } from "@/config";
 
 export const SOCIALS = [
   {
     name: "Github",
-    href: "https://github.com/satnaing/astro-paper",
+    href: "https://github.com/achuanya/lhasa",
     linkTitle: ` ${SITE.title} on Github`,
     icon: IconGitHub,
   },
   {
-    name: "X",
-    href: "https://x.com/username",
-    linkTitle: `${SITE.title} on X`,
-    icon: IconBrandX,
+    name: "Douyin",
+    href: "https://www.douyin.com/user/MS4wLjABAAAAKa6NwPUcIhC4qAwdvPjfGSyyENvEk1rGPBJVRQIQmCo",
+    linkTitle: `${SITE.title} on Douyin`,
+    icon: IconDouyin,
   },
   {
-    name: "LinkedIn",
-    href: "https://www.linkedin.com/in/username/",
-    linkTitle: `${SITE.title} on LinkedIn`,
-    icon: IconLinkedin,
+    name: "Telegram",
+    href: "https://t.me/lhasa88",
+    linkTitle: `Share this post via Telegram`,
+    icon: IconTelegram,
   },
   {
     name: "Mail",
-    href: "mailto:yourmail@gmail.com",
+    href: "mailto:haibao1027@gmail.com",
     linkTitle: `Send an email to ${SITE.title}`,
     icon: IconMail,
   },
