@@ -35,13 +35,13 @@ if ((!imgSrc || imgSrc.trim() === "") && fallbackOgImage) {
       <img
         src={imgSrc}
         alt={title}
-        class={imageClass || defaultImageClass}
+        class={`${imageClass || defaultImageClass} mx-auto my-auto`}
         loading="lazy"
         onerror={fallbackOgImage ? `this.onerror=null; this.src='${fallbackOgImage}';` : undefined}
       />
     </a>
   )}
-  <div class="flex-grow">
+  <div class="flex-grow mx-auto my-auto">
     <a
       href={getPath(id, filePath)}
       class="inline-block text-lg font-medium text-accent decoration-dashed underline-offset-4 focus-visible:no-underline focus-visible:underline-offset-0"
