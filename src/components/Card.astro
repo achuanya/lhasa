@@ -29,6 +29,7 @@ const defaultImageClass = "w-[76px] sm:w-[81.78px] h-auto object-cover rounded-m
         src={typeof ogImage === 'string' ? ogImage : (ogImage as any).src}
         alt={title}
         class={imageClass || defaultImageClass}
+        loading="lazy"
       />
     </a>
   )}
