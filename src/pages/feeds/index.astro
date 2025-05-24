@@ -46,14 +46,11 @@ const feedsDataForClient = {
   initialItemCount: INITIAL_ITEMS_TO_SHOW,
   itemsPerPage: 4,
 };
-
-const pageTitle = "Feeds";
 ---
 
 <Layout title={`Feeds | ${SITE.title}`}>
   <Header />
-  <Main>
-    <h1 class="text-4xl font-bold mb-6">Feeds</h1>
+    <Main pageTitle="Feeds" pageDesc="">
     {errorFetching && (
       <div class="mb-4 rounded bg-red-100 p-4 text-red-700">
         <p>{errorFetching}</p>
