@@ -23,9 +23,10 @@
 /* base.scss */
 .container {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: flex-start;
   padding: 24px 0px 0px 0px;
+  gap: 73px;
 }
 
 #totalActivities {
@@ -88,6 +89,15 @@
     width: 100%;
     max-width: 600px;
     text-align: center;
+  }
+  
+  .icon-container {
+    justify-content: center;
+  }
+  
+  .icon-svg {
+    width: 25px;
+    height: 25px;
   }
 }
 
@@ -165,7 +175,6 @@
   flex-direction: column;
   gap: 4px;
   width: 207px;
-  margin-top: 4px;
 }
 
 .bar-container {
@@ -176,17 +185,17 @@
 }
 
 .bar {
-  background-color: var(--cycling-color);
+  background-color: var(--cycling-color, #3b82f6);
   height: 16.8px;
   transition: width 1s ease-out;
   margin-top: 6px;
-  border: 1px solid var(--light-gray-border-color);
+  border: 1px solid var(--light-gray-border-color, #e5e7eb);
   position: relative;
 }
 
 .cycling-kilometer {
   font-size: 12px;
-  color: var(--gray-color);
+  color: var(--gray-color, #6b7280);
   position: absolute;
   right: -63px;
   top: 50%;
@@ -206,60 +215,47 @@
 .icon-container {
   display: flex;
   align-items: center;
+  gap: 20px;
+  margin-bottom: 8px;
 }
 
 .icon-item {
   display: flex;
   align-items: center;
-  margin-right: 0;
-}
-
-.icon-item svg {
-  width: 27px;
-  height: 27px;
-}
-
-.running svg {
-  width: 21px !important;
-}
-
-.icon-item .running_color {
-  margin-right: 10px;
-}
-
-.icon-item .icon-svg {
-  margin-left: 10px;
-}
-
-.running {
-  margin-left: 10px;
+  gap: 8px;
 }
 
 .icon-svg {
-  display: flex;
-  align-items: center;
-}
-
-.cycling-icon {
   width: 25px;
   height: 25px;
+  stroke: currentColor;
+  fill: none;
+}
+
+.icon-svg.cycling {
+  color: var(--cycling-color, #3b82f6);
+}
+
+.icon-svg.running {
+  color: var(--running-color, #ef4444);
 }
 
 .road_bike_color,
 .running_color {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
+  flex-shrink: 0;
 }
 
 .road_bike_color {
-  background: var(--cycling-color);
-  border: 1px solid var(--cycling-border-color);
+  background: var(--cycling-color, #3b82f6);
+  border: 1px solid var(--cycling-border-color, #2563eb);
 }
 
 .running_color {
-  background: var(--running-color);
-  border: 1px solid var(--running-border-color);
+  background: var(--running-color, #ef4444);
+  border: 1px solid var(--running-border-color, #dc2626);
 }
 
 /* message-box.scss */

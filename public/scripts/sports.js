@@ -282,7 +282,7 @@ function getChinaTime() {
 
 // 手搓JSON
 async function loadActivityData() {
-    const response = await fetch('https://cos.lhasa.icu/data/strava_data.json');
+    const response = await fetch('https://cos.lhasa.icu/assets/strava_data.json');
     return response.json();
 }
 
