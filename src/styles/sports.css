@@ -20,6 +20,25 @@
   --text-color: #fff;
 }
 
+/* 黑暗模式配色 */
+html[data-theme="dark"] {
+  --primary-color: var(--accent);
+  --date-underline-color: var(--accent);
+  --gray-color: var(--foreground);
+  --light-gray-color: var(--muted);
+  --light-gray-border-color: var(--border);
+  --no-activity-color: #64748b;
+
+  --cycling-color: rgba(255, 107, 1, 0.2);
+  --cycling-border-color: var(--accent);
+
+  --running-color: rgba(16, 185, 129, 0.2);
+  --running-border-color: #10b981;
+
+  --background-color: var(--background);
+  --text-color: var(--foreground);
+}
+
 /* base.scss */
 .container {
   display: flex;
@@ -169,6 +188,20 @@
   background-color: var(--no-activity-color);
 }
 
+/* 黑暗模式下的日历样式优化 */
+html[data-theme="dark"] .date-number {
+  color: var(--accent)!important;
+  border-bottom-color: var(--accent);
+}
+
+html[data-theme="dark"] .activity-indicator {
+  background: var(--accent);
+}
+
+html[data-theme="dark"] .activity-indicator.no-activity {
+  background-color: var(--accent);
+}
+
 /* bar-chart.scss */
 .bar-chart {
   display: flex;
@@ -203,6 +236,16 @@
   white-space: nowrap;
   opacity: 0;
   transition: opacity 1s ease-in-out;
+}
+
+/* 黑暗模式下的柱状图样式 */
+html[data-theme="dark"] .bar {
+  background-color: var(--cycling-color);
+  border-color: var(--cycling-border-color);
+}
+
+html[data-theme="dark"] .cycling-kilometer {
+  color: var(--foreground);
 }
 
 /* sports.scss */
@@ -289,4 +332,31 @@
   transition: opacity 0.3s ease-out;
   background-color: var(--background-color);
   color: var(--text-color);
+}
+
+/* 黑暗模式下的图标和消息框样式 */
+html[data-theme="dark"] .icon-svg.cycling {
+  color: var(--accent);
+}
+
+html[data-theme="dark"] .icon-svg.running {
+  color: #10b981;
+}
+
+html[data-theme="dark"] .road_bike_color {
+  background: var(--cycling-color);
+  border-color: var(--cycling-border-color);
+}
+
+html[data-theme="dark"] .running_color {
+  background: var(--running-color);
+  border-color: var(--running-border-color);
+}
+
+html[data-theme="dark"] .message-box,
+html[data-theme="dark"] .click-message-box {
+  background-color: var(--muted);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  border-radius: 6px;
 }

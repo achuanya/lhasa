@@ -53,6 +53,12 @@ import "../styles/sports.css";
                 console.error('销毁Sports失败:', err);
             }
         }
+        
+        // 清理主题观察器
+        if (window._sportsThemeObserver) {
+            window._sportsThemeObserver.disconnect();
+            window._sportsThemeObserver = null;
+        }
     }
 
     // 初始化 Sports 实例
@@ -149,8 +155,10 @@ import "../styles/sports.css";
                     // 记录今天的日期
                     todayContainer = dayContainer;
                     dayContainer.classList.add('today');
-                    ball.style.backgroundColor = '#242428';
-                    dateNumber.style.color = '#242428';
+                    // 使用 CSS 变量获取当前主题的颜色
+                    const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim();
+                    ball.style.backgroundColor = primaryColor;
+                    dateNumber.style.color = primaryColor;
                     dateNumber.style.opacity = '1';
                     ball.style.opacity = '0';
                 }
@@ -465,6 +473,16 @@ import "../styles/sports.css";
         initSports();
     }
 
+    // 主题切换处理
+    function handleThemeChange() {
+        console.log('主题切换，重新初始化 Sports 组件');
+        destroySports();
+        // 延迟一点时间确保 CSS 变量已更新
+        setTimeout(() => {
+            initSports();
+        }, 50);
+    }
+
     // 单次绑定事件监听
     function setupSports() {
         if (window._sportsInitialized) return;
@@ -473,6 +491,24 @@ import "../styles/sports.css";
         // 页面切换事件
         document.addEventListener('astro:before-swap', destroySports);
         document.addEventListener('astro:after-swap', handlePageLoad);
+
+        // 监听主题切换
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+                    handleThemeChange();
+                }
+            });
+        });
+
+        // 观察 html 元素的 data-theme 属性变化
+        observer.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['data-theme']
+        });
+
+        // 存储观察器以便清理
+        window._sportsThemeObserver = observer;
 
         // 初始加载
         if (document.readyState === 'complete') {
