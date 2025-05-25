@@ -26,13 +26,11 @@ const { src, alt, class: className, style, caption = "long", exif } = Astro.prop
         <span class="caption-text">{alt}</span>
       </figcaption>
     )}
-    {exif && (
-      <div class="exif-tooltip" data-exif-tooltip>
-        <div class="exif-content">
-          <div class="exif-loading">Loading EXIF data...</div>
-        </div>
+    <div class="exif-tooltip" data-exif-tooltip>
+      <div class="exif-content">
+        <div class="exif-loading">Loading EXIF data...</div>
       </div>
-    )}
+    </div>
   </div>
 </figure>
 
@@ -117,36 +115,118 @@ const { src, alt, class: className, style, caption = "long", exif } = Astro.prop
     return exifData.settings || 'EXIF data unavailable';
   }
 
-  async function loadExifData(url: string): Promise<string> {
+  // 生成模拟的 EXIF 数据
+  function generateMockExifData(imageSrc: string): string {
+    // 获取发布日期并转换格式
+    function getPublishDate(): string {
+      const pubDateElement = document.getElementById('pub-datetime');
+      if (pubDateElement) {
+        const dateTime = pubDateElement.getAttribute('datetime');
+        if (dateTime) {
+          // 从 ISO 格式转换为 YYYY-MM-DD
+          return dateTime.split('T')[0];
+        }
+        
+        // 如果没有 datetime 属性，尝试解析文本内容
+        const dateText = pubDateElement.textContent?.trim();
+        if (dateText) {
+          // 解析 '26 May, 2025' 格式
+          const date = new Date(dateText);
+          if (!isNaN(date.getTime())) {
+            return date.toISOString().split('T')[0];
+          }
+        }
+      }
+      
+      // 如果无法获取发布日期，使用当前日期
+      return new Date().toISOString().split('T')[0];
+    }
+
+    // 简单的哈希函数，基于图片 URL 生成一致的随机数
+    function simpleHash(str: string): number {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // 转换为32位整数
+      }
+      return Math.abs(hash);
+    }
+
+    // 生成基于图片URL的一致性随机参数
+    const hash = simpleHash(imageSrc);
+    
+    const apertures = ['1.4', '1.7', '2.0', '2.8', '4.0', '5.6'];
+    const shutterSpeeds = ['1/60', '1/125', '1/250', '1/500', '1/715', '1/1000'];
+    const isoValues = ['100', '200', '400', '800', '1600'];
+    const focalLengths = ['24', '35', '50', '85', '135'];
+    const devices = [
+      'Samsung Galaxy S23 Ultra',
+    ];
+
+    const aperture = apertures[hash % apertures.length];
+    const shutterSpeed = shutterSpeeds[(hash >> 3) % shutterSpeeds.length];
+    const iso = isoValues[(hash >> 6) % isoValues.length];
+    const focalLength = focalLengths[(hash >> 9) % focalLengths.length];
+    const device = devices[(hash >> 12) % devices.length];
+    const publishDate = getPublishDate();
+
+    return `F/${aperture} · ${shutterSpeed}s · ISO ${iso} · ${focalLength}mm · sRGB · Auto WB · ${publishDate} · ${device}`;
+  }
+
+  async function loadExifData(url: string, imageSrc: string): Promise<string> {
     try {
       const response = await fetch(url);
       if (!response.ok) throw new Error('Failed to fetch EXIF data');
       
       const data: ExifData = await response.json();
       const processed = parseExifData(data);
-      return formatExifDisplay(processed);
+      const result = formatExifDisplay(processed);
+      
+      // 如果没有有效的 EXIF 数据，生成模拟数据
+      if (result === 'EXIF data unavailable') {
+        return generateMockExifData(imageSrc);
+      }
+      
+      return result;
     } catch (error) {
-      console.error('Error loading EXIF data:', error);
-      return 'EXIF data unavailable';
+      // 加载失败时也生成模拟数据
+      return generateMockExifData(imageSrc);
     }
   }
 
   function initExifTooltips() {
-    const images = document.querySelectorAll('.img-main[data-exif-url]');
+    // 选择所有图片，不管是否有 data-exif-url
+    const images = document.querySelectorAll('.img-main');
     
     images.forEach((img) => {
       const exifUrl = img.getAttribute('data-exif-url');
       const tooltip = img.parentElement?.querySelector('[data-exif-tooltip]') as HTMLElement;
       
-      if (!exifUrl || !tooltip) return;
+      if (!tooltip) return;
 
       let exifDataCache: string | null = null;
       let isLoading = false;
+      let hideTimeout: ReturnType<typeof setTimeout> | null = null;
 
       const showTooltip = async () => {
+        // 清除任何待执行的隐藏定时器
+        if (hideTimeout) {
+          clearTimeout(hideTimeout);
+          hideTimeout = null;
+        }
+
         if (!exifDataCache && !isLoading) {
           isLoading = true;
-          exifDataCache = await loadExifData(exifUrl);
+          const imageSrc = (img as HTMLImageElement).src;
+          
+          // 如果有 exifUrl，尝试加载真实数据，否则直接使用模拟数据
+          if (exifUrl) {
+            exifDataCache = await loadExifData(exifUrl, imageSrc);
+          } else {
+            exifDataCache = generateMockExifData(imageSrc);
+          }
+          
           isLoading = false;
           
           const content = tooltip.querySelector('.exif-content');
@@ -159,17 +239,34 @@ const { src, alt, class: className, style, caption = "long", exif } = Astro.prop
       };
 
       const hideTooltip = () => {
-        tooltip.classList.remove('show');
+        hideTimeout = setTimeout(() => {
+          tooltip.classList.remove('show');
+          hideTimeout = null;
+        }, 1000);
+      };
+
+      const cancelHide = () => {
+        // 取消隐藏
+        if (hideTimeout) {
+          clearTimeout(hideTimeout);
+          hideTimeout = null;
+        }
       };
 
       img.addEventListener('mouseenter', showTooltip);
       img.addEventListener('mouseleave', hideTooltip);
       
+      // 鼠标进入工具提示区域时取消隐藏
+      tooltip.addEventListener('mouseenter', cancelHide);
+      tooltip.addEventListener('mouseleave', hideTooltip);
+      
       // Touch support for mobile
       img.addEventListener('touchstart', (e) => {
         e.preventDefault();
         showTooltip();
-        setTimeout(hideTooltip, 3000); // Auto hide after 3 seconds on touch
+        setTimeout(() => {
+          tooltip.classList.remove('show');
+        }, 3000); // Auto hide after 3 seconds on touch
       });
     });
   }
@@ -198,7 +295,7 @@ const { src, alt, class: className, style, caption = "long", exif } = Astro.prop
     width: auto;
     border-radius: 8px;
     box-sizing: border-box;
-    overflow: visible; /* Changed from hidden to allow tooltip overflow */
+    overflow: hidden; /* 恢复为hidden，确保EXIF从内部滑出 */
   }
   
   .img-main {
@@ -279,7 +376,7 @@ const { src, alt, class: className, style, caption = "long", exif } = Astro.prop
     box-sizing: border-box;
   }
 
-  /* EXIF Tooltip Styles - 与长标签样式保持一致 */
+  /* EXIF Tooltip Styles - 从图片内部向下滑出 */
   .exif-tooltip {
     position: absolute;
     top: 0;
@@ -287,9 +384,9 @@ const { src, alt, class: className, style, caption = "long", exif } = Astro.prop
     right: 0;
     opacity: 0;
     visibility: hidden;
-    transform: translateY(-10px);
-    transition: all 0.3s ease;
-    z-index: 1000;
+    transform: translateY(-100%);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 10;
     pointer-events: none;
     border-radius: 8px 8px 0 0;
     overflow: hidden;
@@ -300,22 +397,23 @@ const { src, alt, class: className, style, caption = "long", exif } = Astro.prop
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
+    pointer-events: auto;
   }
 
   .exif-content {
     display: block;
     padding: 8px 16px;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     font-weight: 500;
     color: #ffffff;
-    background: rgba(0, 0, 0, 0.6);
+    background: rgba(0, 0, 0, 0.7);
     backdrop-filter: blur(12px) saturate(180%);
     -webkit-backdrop-filter: blur(12px) saturate(180%);
-    text-align: left;
+    text-align: center;
     line-height: 1.4;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
     border-radius: 8px 8px 0 0;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -389,7 +487,7 @@ const { src, alt, class: className, style, caption = "long", exif } = Astro.prop
     }
 
     .exif-content {
-      font-size: 0.8rem;
+      font-size: 0.4rem;
       padding: 8px 10px;
     }
   }
