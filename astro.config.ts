@@ -34,7 +34,7 @@ export default defineConfig({
       exclude: ["@resvg/resvg-js"],
     },
     server: {
-      allowedHosts: ["blog.lhasa.icu"],
+      allowedHosts: ["lhasa.icu"],
     },
     define: {
       IMAGES: JSON.stringify("https://cos.lhasa.icu/ArticlePictures"),

@@ -12,7 +12,7 @@
 实际的OG图像URL应该是：
 ```
 ✅ http://localhost:4321/CyclingPage.png
-✅ https://blog.lhasa.icu/CyclingPage.png
+✅ https://lhasa.icu/CyclingPage.png
 ```
 
 ## 📁 文件结构说明
@@ -49,14 +49,14 @@ dist/
 
 ### 网站OG图像
 ```
-https://blog.lhasa.icu/og.png
+https://lhasa.icu/og.png
 ```
 
 ### 文章OG图像示例
 ```
-https://blog.lhasa.icu/CyclingPage.png
-https://blog.lhasa.icu/SomeThoughtsOnCycling.png
-https://blog.lhasa.icu/WilierCento10SL.png
+https://lhasa.icu/CyclingPage.png
+https://lhasa.icu/SomeThoughtsOnCycling.png
+https://lhasa.icu/WilierCento10SL.png
 ```
 
 ## 🛠️ 社交媒体测试
@@ -64,20 +64,20 @@ https://blog.lhasa.icu/WilierCento10SL.png
 使用以下工具测试你的OG图像：
 
 1. **Facebook调试器**: https://developers.facebook.com/tools/debug/
-   - 输入: `https://blog.lhasa.icu/CyclingPage/`
+   - 输入: `https://lhasa.icu/CyclingPage/`
    
 2. **Twitter卡片验证器**: https://cards-dev.twitter.com/validator
-   - 输入: `https://blog.lhasa.icu/CyclingPage/`
+   - 输入: `https://lhasa.icu/CyclingPage/`
    
 3. **LinkedIn帖子检查器**: https://www.linkedin.com/post-inspector/
-   - 输入: `https://blog.lhasa.icu/CyclingPage/`
+   - 输入: `https://lhasa.icu/CyclingPage/`
 
 ## ✅ 结论
 
 你的OG图像配置是**完全正常**的！问题只是测试URL格式错误。
 
 ### 正确的测试方法：
-1. 访问文章页面：`https://blog.lhasa.icu/CyclingPage/`
+1. 访问文章页面：`https://lhasa.icu/CyclingPage/`
 2. 查看页面源代码，找到 `<meta property="og:image" content="...">` 标签
 3. 该标签中的URL就是正确的OG图像地址
 
