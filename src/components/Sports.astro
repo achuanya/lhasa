@@ -155,10 +155,7 @@ import "../styles/sports.css";
                     // 记录今天的日期
                     todayContainer = dayContainer;
                     dayContainer.classList.add('today');
-                    // 使用 CSS 变量获取当前主题的颜色
-                    const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim();
-                    ball.style.backgroundColor = primaryColor;
-                    dateNumber.style.color = primaryColor;
+                    // 不再使用内联样式，改为通过 CSS 类来控制样式
                     dateNumber.style.opacity = '1';
                     ball.style.opacity = '0';
                 }

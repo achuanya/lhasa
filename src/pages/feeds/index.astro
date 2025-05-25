@@ -62,7 +62,7 @@ const feedsDataForClient = {
         <ul id="feeds-list" class="list-none p-0">
           {allFeedsData.items.slice(0, feedsDataForClient.initialItemCount).map(item => {
             const imgSrc = item.avatar || FALLBACK_OG_IMAGE;
-            const description = `来自 ${item.blog_name}`;
+            const description = `By ${item.blog_name}`;
             const shortDescription = description.length > 40 ? description.substring(0, 40) + "..." : description;
             
             return (

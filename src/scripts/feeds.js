@@ -30,7 +30,7 @@ function formatFeedDate(dateString, tz) {
 
 function createFeedCardHTML(item, siteTimezone, fallbackOgImageGlobal) {
   const pubDate = formatFeedDate(item.published, siteTimezone);
-  const description = `来自 ${item.blog_name}`;
+  const description = `By ${item.blog_name}`;
   const shortDescription = description.length > 40 ? description.substring(0, 40) + "..." : description;
 
   const defaultImageClass = "w-[76px] sm:w-[81.78px] h-auto object-cover rounded-md aspect-square group-hover:opacity-90 transition-opacity duration-300";
