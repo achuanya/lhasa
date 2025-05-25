@@ -33,14 +33,14 @@ export function getPath(
   useSimpleUrl = true,
   customPrefix?: string
 ) {
-  // If using simple URL structure for main blog posts, just return the slug
+  // If using simple URL structure for main blog posts, just return the slug with trailing slash
   if (useSimpleUrl && !customPrefix) {
-    return `/${getSlugFromPath(id, filePath)}`;
+    return `/${getSlugFromPath(id, filePath)}/`;
   }
 
-  // If using custom prefix, use simple structure: customPrefix/slug
+  // If using custom prefix, use simple structure: customPrefix/slug with trailing slash
   if (customPrefix) {
-    return `${customPrefix}/${getSlugFromPath(id, filePath)}`;
+    return `${customPrefix}/${getSlugFromPath(id, filePath)}/`;
   }
 
   // Original complex path logic for backward compatibility
@@ -58,10 +58,10 @@ export function getPath(
   const blogId = id.split("/");
   const slug = blogId.length > 0 ? blogId.slice(-1) : blogId;
 
-  // If not inside the sub-dir, simply return the file path
+  // If not inside the sub-dir, simply return the file path with trailing slash
   if (!pathSegments || pathSegments.length < 1) {
-    return [basePath, slug].join("/");
+    return [basePath, slug].join("/") + "/";
   }
 
-  return [basePath, ...pathSegments, slug].join("/");
+  return [basePath, ...pathSegments, slug].join("/") + "/";
 }

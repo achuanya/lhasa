@@ -11,8 +11,8 @@ function getPostPath(id) {
   const blogId = id.split("/");
   const slug = blogId.length > 0 ? blogId.slice(-1)[0] : id;
 
-  // 返回简化的URL结构，只包含slug
-  return `/${slug}`;
+  // 返回简化的URL结构，只包含slug，带尾部斜杠
+  return `/${slug}/`;
 }
 
 function formatArchiveDate(dateString, tz) {
