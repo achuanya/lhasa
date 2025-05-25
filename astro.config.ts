@@ -39,6 +39,7 @@ export default defineConfig({
     },
     define: {
       IMAGES: JSON.stringify("https://cos.lhasa.icu/ArticlePictures"),
+      EXIF: JSON.stringify("https://lhasa-1253887673.cos.ap-shanghai.myqcloud.com/ArticlePictures"),
     },
   },
   image: {

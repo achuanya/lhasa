@@ -5,21 +5,181 @@ export interface Props {
   class?: string;
   style?: string;
   caption?: false | 'long' | 'short';
+  exif?: string;
 }
 
-const { src, alt, class: className, style, caption = "long" } = Astro.props;
+const { src, alt, class: className, style, caption = "long", exif } = Astro.props;
 ---
 
 <figure class={`img-container ${className || ''}`} style={style}>
   <div class="img-wrapper">
-    <img src={src} alt={alt} title={alt} loading="lazy" class="img-main" />
+    <img 
+      src={src} 
+      alt={alt} 
+      title={alt} 
+      loading="lazy" 
+      class="img-main" 
+      data-exif-url={exif ? exif + "?exif" : undefined}
+    />
     {caption && (
       <figcaption class={`img-caption caption-${caption === 'long' ? 'bar' : 'tag'}`}>
         <span class="caption-text">{alt}</span>
       </figcaption>
     )}
+    {exif && (
+      <div class="exif-tooltip" data-exif-tooltip>
+        <div class="exif-content">
+          <div class="exif-loading">Loading EXIF data...</div>
+        </div>
+      </div>
+    )}
   </div>
 </figure>
+
+<script>
+  interface ExifData {
+    [key: string]: {
+      val: string;
+    };
+  }
+
+  interface ProcessedExifData {
+    settings?: string;
+  }
+
+  function parseExifData(data: ExifData): ProcessedExifData {
+    const result: ProcessedExifData = {};
+    const settings = [];
+
+    // 光圈 F/1.7
+    if (data.FNumber?.val) {
+      const aperture = eval(data.FNumber.val);
+      settings.push(`F/${aperture.toFixed(1)}`);
+    }
+    
+    // 快门速度 1/714s
+    if (data.ExposureTime?.val) {
+      const exposure = eval(data.ExposureTime.val);
+      if (exposure >= 1) {
+        settings.push(`${exposure.toFixed(1)}s`);
+      } else {
+        settings.push(`1/${Math.round(1/exposure)}s`);
+      }
+    }
+    
+    // ISO ISO 10
+    if (data.ISOSpeedRatings?.val) {
+      settings.push(`ISO ${data.ISOSpeedRatings.val}`);
+    }
+
+    // 焦距 6.3mm
+    if (data.FocalLength?.val) {
+      const focal = eval(data.FocalLength.val);
+      settings.push(`${focal.toFixed(1)}mm`);
+    }
+
+    // 色彩空间 sRGB
+    if (data.ColorSpace?.val) {
+      settings.push(data.ColorSpace.val);
+    }
+
+    // 白平衡 Auto WB
+    if (data.WhiteBalance?.val) {
+      const wb = data.WhiteBalance.val === "0" ? "Auto WB" : "Manual WB";
+      settings.push(wb);
+    }
+
+    // 拍摄时间 2025-05-23
+    if (data.DateTimeOriginal?.val) {
+      const dateStr = data.DateTimeOriginal.val;
+      const date = dateStr.split(' ')[0].replace(/:/g, '-');
+      settings.push(date);
+    }
+
+    // 设备型号 Samsung Galaxy S23 Ultra
+    if (data.Software?.val) {
+      let deviceName = data.Software.val;
+      // 特殊处理Samsung设备
+      if (deviceName === "S9180ZCU6DYDA") {
+        deviceName = "Samsung Galaxy S23 Ultra";
+      }
+      settings.push(deviceName);
+    }
+
+    if (settings.length > 0) {
+      result.settings = settings.join(' · ');
+    }
+
+    return result;
+  }
+
+  function formatExifDisplay(exifData: ProcessedExifData): string {
+    return exifData.settings || 'EXIF data unavailable';
+  }
+
+  async function loadExifData(url: string): Promise<string> {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Failed to fetch EXIF data');
+      
+      const data: ExifData = await response.json();
+      const processed = parseExifData(data);
+      return formatExifDisplay(processed);
+    } catch (error) {
+      console.error('Error loading EXIF data:', error);
+      return 'EXIF data unavailable';
+    }
+  }
+
+  function initExifTooltips() {
+    const images = document.querySelectorAll('.img-main[data-exif-url]');
+    
+    images.forEach((img) => {
+      const exifUrl = img.getAttribute('data-exif-url');
+      const tooltip = img.parentElement?.querySelector('[data-exif-tooltip]') as HTMLElement;
+      
+      if (!exifUrl || !tooltip) return;
+
+      let exifDataCache: string | null = null;
+      let isLoading = false;
+
+      const showTooltip = async () => {
+        if (!exifDataCache && !isLoading) {
+          isLoading = true;
+          exifDataCache = await loadExifData(exifUrl);
+          isLoading = false;
+          
+          const content = tooltip.querySelector('.exif-content');
+          if (content) {
+            content.innerHTML = `<span class="exif-text">${exifDataCache}</span>`;
+          }
+        }
+        
+        tooltip.classList.add('show');
+      };
+
+      const hideTooltip = () => {
+        tooltip.classList.remove('show');
+      };
+
+      img.addEventListener('mouseenter', showTooltip);
+      img.addEventListener('mouseleave', hideTooltip);
+      
+      // Touch support for mobile
+      img.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        showTooltip();
+        setTimeout(hideTooltip, 3000); // Auto hide after 3 seconds on touch
+      });
+    });
+  }
+
+  // Initialize on page load
+  document.addEventListener('DOMContentLoaded', initExifTooltips);
+  
+  // Re-initialize on Astro page transitions
+  document.addEventListener('astro:page-load', initExifTooltips);
+</script>
 
 <style>
   .img-container {
@@ -38,7 +198,7 @@ const { src, alt, class: className, style, caption = "long" } = Astro.props;
     width: auto;
     border-radius: 8px;
     box-sizing: border-box;
-    overflow: hidden;
+    overflow: visible; /* Changed from hidden to allow tooltip overflow */
   }
   
   .img-main {
@@ -52,6 +212,7 @@ const { src, alt, class: className, style, caption = "long" } = Astro.props;
     vertical-align: top;
     object-fit: cover;
     object-position: center;
+    cursor: pointer;
   }
   
   .img-caption {
@@ -78,7 +239,7 @@ const { src, alt, class: className, style, caption = "long" } = Astro.props;
     font-size: 0.9rem;
     font-weight: 500;
     color: #ffffff;
-    background: rgba(0, 0, 0, 0.6);
+    background: rgba(0, 0, 0, 1);
     backdrop-filter: blur(12px) saturate(180%);
     -webkit-backdrop-filter: blur(12px) saturate(180%);
     text-align: left;
@@ -117,18 +278,69 @@ const { src, alt, class: className, style, caption = "long" } = Astro.props;
     word-wrap: break-word;
     box-sizing: border-box;
   }
-  
-  :global(.dark) .caption-bar .caption-text {
-    background: rgba(0, 0, 0, 0.7);
+
+  /* EXIF Tooltip Styles - 与长标签样式保持一致 */
+  .exif-tooltip {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    z-index: 1000;
+    pointer-events: none;
+    border-radius: 8px 8px 0 0;
+    overflow: hidden;
+    max-width: 100%;
+  }
+
+  .exif-tooltip.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .exif-content {
+    display: block;
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #ffffff;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    text-align: left;
+    line-height: 1.4;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+    border-radius: 8px 8px 0 0;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .exif-text,
+  .exif-loading {
+    color: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+    text-shadow: inherit;
+    white-space: inherit;
+    overflow: inherit;
+    text-overflow: inherit;
+    max-width: inherit;
+  }
+
+  .exif-loading {
+    opacity: 0.7;
+    font-style: italic;
   }
   
-  :global(.dark) .caption-tag .caption-text {
-    background: rgba(0, 0, 0, 0.7);
-  }
-  
-  :global(.dark) .img-main {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  }
   
   @media (max-width: 768px) {
     .img-container {
@@ -154,6 +366,11 @@ const { src, alt, class: className, style, caption = "long" } = Astro.props;
       left: 12px;
       max-width: calc(100% - 24px);
     }
+
+    .exif-content {
+      font-size: 0.85rem;
+      padding: 10px 12px;
+    }
   }
   
   @media (max-width: 480px) {
@@ -169,6 +386,11 @@ const { src, alt, class: className, style, caption = "long" } = Astro.props;
     .caption-tag .caption-text {
       font-size: 0.75rem;
       padding: 5px 8px;
+    }
+
+    .exif-content {
+      font-size: 0.8rem;
+      padding: 8px 10px;
     }
   }
   
@@ -188,4 +410,6 @@ const { src, alt, class: className, style, caption = "long" } = Astro.props;
   :global(.dark) .img-main {
     background-color: var(--color-muted, #2a2a2a);
   }
+
+
 </style>
