@@ -46,6 +46,7 @@ html[data-theme="dark"] {
   align-items: flex-start;
   padding: 24px 0px 0px 0px;
   gap: 73px;
+  min-height: 178px;
 }
 
 #totalActivities {
