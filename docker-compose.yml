@@ -8,7 +8,7 @@ services:
       TZ: Asia/Shanghai
       ATK_LOCALE: zh-CN
       ATK_SITE_DEFAULT: 游钓四方的博客
-      ATK_SITE_URL: https://blog.lhasa.icu
+      ATK_SITE_URL: https://lhasa.icu
     volumes:
       - ./data:/data
 
