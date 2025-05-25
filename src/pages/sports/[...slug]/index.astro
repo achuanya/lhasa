@@ -24,7 +24,7 @@ const { post } = Astro.props;
 const posts = await getCollection("blog", ({ data }) => {
   return !data.draft && data.category === "sports";
 });
-const sortedPosts = getSortedPosts(posts).slice(0, SITE.postPerIndex);
+const sortedPosts = getSortedPosts(posts);
 ---
 
 <PostDetails post={post} posts={sortedPosts} />
