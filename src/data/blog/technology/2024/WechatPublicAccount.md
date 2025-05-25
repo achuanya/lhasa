@@ -6,7 +6,7 @@ category: technology
 pubDatetime: 2024-03-10T15:51+08:00
 title: 搞个公众号
 slug: WechatPublicAccount
-ogImage: https://cos.lhasa.icu/ArticlePictures/WechatPublicAccount.png
+ogImage: https://cos.lhasa.icu/ArticlePictures/WechatPublicAccount.png_81
 tags:
   - 公众号  
   

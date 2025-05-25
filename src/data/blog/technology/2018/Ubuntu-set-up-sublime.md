@@ -6,7 +6,7 @@ category: technology
 pubDatetime: 2018-08-30T00:01+08:00
 title: Ubuntu 18.04 下安装 Sublime Text3 并解决它的疑难杂症
 slug: Ubuntu-set-up-sublime
-ogImage: https://cos.lhasa.icu/ArticlePictures/sublime.jpg
+ogImage: https://cos.lhasa.icu/ArticlePictures/sublime.jpg_81
 tags:
   - Ubuntu
   - Sublime Txet
