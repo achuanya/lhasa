@@ -7,7 +7,7 @@ import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import Card from "@/components/Card.astro";
 import Pagination from "@/components/Pagination.astro";
-import CyclingStats from "@/components/CyclingStats.astro";
+import Sports from "@/components/Sports.astro";
 import getSortedPosts from "@/utils/getSortedPosts";
 import { SITE } from "@/config";
 
@@ -23,7 +23,7 @@ const { page } = Astro.props;
 
 <Layout title={`Sports | ${SITE.title}`}>
   <Header />
-  <CyclingStats />
+  <Sports />
   <Main pageTitle="Sports" pageDesc="">
     <ul>
       {page.data.map(data => <Card {...data} />)}
