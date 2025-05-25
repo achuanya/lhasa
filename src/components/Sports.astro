@@ -418,7 +418,7 @@ import "../styles/sports.css";
                 clearTimeout(mouseLeaveTimeout);
                 clearTimeout(autoHideTimeout);
 
-                const message = weeklyData > 140 ? '这周干的还不错' : '偷懒了啊';
+                const message = weeklyData > 70 ? '骑行出发吧！' : '偷懒了';
                 messageBox.innerText = message;
                 messageBox.classList.add('show');
 
@@ -436,7 +436,7 @@ import "../styles/sports.css";
             });
 
             bar.addEventListener('click', () => {
-                clickMessageBox.innerText = '一起来运动吧！';
+                clickMessageBox.innerText = '你也感兴趣吗';
                 clickMessageBox.classList.add('show');
                 const timer = setTimeout(() => {
                     clickMessageBox.classList.remove('show');
