@@ -11,7 +11,7 @@ import rehypeKatex from "rehype-katex";
 // https://astro.build/config
 export default defineConfig({
   site: SITE.website,
-  trailingSlash: "always",
+  trailingSlash: "ignore",
   integrations: [
     mdx({
       remarkPlugins: [remarkMath],

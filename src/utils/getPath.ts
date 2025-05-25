@@ -24,6 +24,7 @@ export function getSlugFromPath(
  * @param includeBase - whether to include `/posts` in return value
  * @param useSimpleUrl - whether to use simple URL structure (just slug)
  * @param customPrefix - custom prefix to use instead of /posts
+ * @param addTrailingSlash - whether to add trailing slash (default: true for pages, false for static resources)
  * @returns blog post path
  */
 export function getPath(
@@ -31,16 +32,19 @@ export function getPath(
   filePath: string | undefined,
   includeBase = true,
   useSimpleUrl = true,
-  customPrefix?: string
+  customPrefix?: string,
+  addTrailingSlash = true
 ) {
-  // If using simple URL structure for main blog posts, just return the slug with trailing slash
+  // If using simple URL structure for main blog posts, just return the slug
   if (useSimpleUrl && !customPrefix) {
-    return `/${getSlugFromPath(id, filePath)}/`;
+    const slug = getSlugFromPath(id, filePath);
+    return addTrailingSlash ? `/${slug}/` : `/${slug}`;
   }
 
-  // If using custom prefix, use simple structure: customPrefix/slug with trailing slash
+  // If using custom prefix, use simple structure: customPrefix/slug
   if (customPrefix) {
-    return `${customPrefix}/${getSlugFromPath(id, filePath)}/`;
+    const slug = getSlugFromPath(id, filePath);
+    return addTrailingSlash ? `${customPrefix}/${slug}/` : `${customPrefix}/${slug}`;
   }
 
   // Original complex path logic for backward compatibility
@@ -58,10 +62,12 @@ export function getPath(
   const blogId = id.split("/");
   const slug = blogId.length > 0 ? blogId.slice(-1) : blogId;
 
-  // If not inside the sub-dir, simply return the file path with trailing slash
+  // If not inside the sub-dir, simply return the file path
   if (!pathSegments || pathSegments.length < 1) {
-    return [basePath, slug].join("/") + "/";
+    const path = [basePath, slug].join("/");
+    return addTrailingSlash ? path + "/" : path;
   }
 
-  return [basePath, ...pathSegments, slug].join("/") + "/";
+  const path = [basePath, ...pathSegments, slug].join("/");
+  return addTrailingSlash ? path + "/" : path;
 }
