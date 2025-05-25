@@ -211,7 +211,7 @@ html[data-theme="dark"] .activity-indicator.no-activity {
 .bar-chart {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
   width: 207px;
   flex: 1;
 }
@@ -227,9 +227,10 @@ html[data-theme="dark"] .activity-indicator.no-activity {
   background-color: var(--cycling-color, #3b82f6);
   height: 16.8px;
   transition: width 1s ease-out;
-  margin-top: 6px;
+  margin-top: 12px;
   border: 1px solid var(--light-gray-border-color, #e5e7eb);
   position: relative;
+
 }
 
 .cycling-kilometer {

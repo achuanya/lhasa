@@ -9,6 +9,11 @@ import IconMenuDeep from "@/assets/icons/IconMenuDeep.svg";
 import LinkButton from "./LinkButton.astro";
 import { SITE } from "@/config";
 
+export interface Props {
+  currentCategory?: string;
+}
+
+const { currentCategory } = Astro.props;
 const { pathname } = Astro.url;
 
 // Remove trailing slash from current pathname if exists
@@ -16,6 +21,15 @@ const currentPath =
   pathname.endsWith("/") && pathname !== "/" ? pathname.slice(0, -1) : pathname;
 
 const isActive = (path: string) => {
+  // 如果有当前文章的分类信息，根据分类判断
+  if (currentCategory) {
+    if (path === "/posts" && currentCategory === "technology") return true;
+    if (path === "/sports" && currentCategory === "sports") return true;
+    if (path === "/feeds" && currentCategory === "life") return true;
+    return false;
+  }
+  
+  // 原有的路径匹配逻辑
   const currentPathArray = currentPath.split("/").filter(p => p.trim());
   const pathArray = path.split("/").filter(p => p.trim());
 

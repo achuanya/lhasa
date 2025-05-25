@@ -5,40 +5,14 @@ import timezone from 'dayjs/plugin/timezone';
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-// 从 getPath 函数复制的路径生成逻辑
-function getPostPath(id, filePath) {
-  const BLOG_PATH = "src/data/blog";
-  
-  // 使用与 lodash.kebabcase 相同的逻辑
-  function slugifyStr(str) {
-    return str
-      .toLowerCase()
-      .trim()
-      .replace(/[^\w\s-]/g, '') // 移除特殊字符
-      .replace(/[\s_-]+/g, '-') // 将空格、下划线、连字符替换为单个连字符
-      .replace(/^-+|-+$/g, ''); // 移除开头和结尾的连字符
-  }
-
-  const pathSegments = filePath
-    ?.replace(BLOG_PATH, "")
-    .split("/")
-    .filter(path => path !== "") // remove empty string in the segments
-    .filter(path => !path.startsWith("_")) // exclude directories start with underscore "_"
-    .slice(0, -1) // remove the last segment (file name) since it's unnecessary
-    .map(segment => slugifyStr(segment)); // slugify each segment path
-
-  const basePath = "/posts";
-
+// 从 getPath 函数复制的路径生成逻辑 - 更新为简化URL结构
+function getPostPath(id) {
   // Making sure `id` does not contain the directory
   const blogId = id.split("/");
-  const slug = blogId.length > 0 ? blogId.slice(-1) : blogId;
+  const slug = blogId.length > 0 ? blogId.slice(-1)[0] : id;
 
-  // If not inside the sub-dir, simply return the file path
-  if (!pathSegments || pathSegments.length < 1) {
-    return [basePath, slug].join("/");
-  }
-
-  return [basePath, ...pathSegments, slug].join("/");
+  // 返回简化的URL结构，只包含slug
+  return `/${slug}`;
 }
 
 function formatArchiveDate(dateString, tz) {
@@ -69,7 +43,7 @@ function createArchiveCardHTML(post, siteTimezone) {
   }
 
   // 使用正确的路径生成函数
-  const postPath = getPostPath(post.id, post.filePath);
+  const postPath = getPostPath(post.id);
 
   return `
     <li class="my-6 flex flex-row gap-6 items-start">
