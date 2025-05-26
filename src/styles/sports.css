@@ -203,7 +203,7 @@ html[data-theme="dark"] {
   font-size: 14px;
   color: black;
   opacity: 0;
-  transition: opacity 0.5s ease;
+  transition: opacity 0.3s ease;
   z-index: 1;
   white-space: nowrap;
   border-bottom: 2px solid var(--date-underline-color);
@@ -213,7 +213,7 @@ html[data-theme="dark"] {
   position: absolute;
   background: black;
   border-radius: 50%;
-  transition: opacity 0.5s ease, transform 0.5s ease;
+  transition: opacity 0.3s ease, transform 0.5s ease;
   z-index: 0;
   display: block;
   transform: translate(-50%, -50%);
@@ -342,13 +342,7 @@ html[data-theme="dark"] {
   }
 }
 
-.day-container:hover .date-number {
-  opacity: 1;
-}
-
-.day-container:hover .activity-indicator {
-  opacity: 0;
-}
+/* 悬停效果现在由JavaScript处理，确保更好的控制 */
 
 .activity-indicator.no-activity {
   background-color: var(--no-activity-color);
