@@ -47,6 +47,19 @@ import "../styles/sports.css";
                     window.sportsInstance.timers.forEach(timer => clearTimeout(timer));
                     window.sportsInstance.timers.forEach(timer => clearInterval(timer));
                 }
+                
+                // 清理元素上的动画引用
+                const ridingTimeElement = document.getElementById('ridingTimeThisYearValue');
+                const milesElement = document.getElementById('milesRiddenThisYearValue');
+                if (ridingTimeElement) {
+                    if (ridingTimeElement._animationInterval) clearInterval(ridingTimeElement._animationInterval);
+                    if (ridingTimeElement._animationTimeout) clearTimeout(ridingTimeElement._animationTimeout);
+                }
+                if (milesElement) {
+                    if (milesElement._animationInterval) clearInterval(milesElement._animationInterval);
+                    if (milesElement._animationTimeout) clearTimeout(milesElement._animationTimeout);
+                }
+                
                 window.sportsInstance = null;
                 console.log('Sports 实例已销毁');
             } catch (err) {
@@ -71,7 +84,8 @@ import "../styles/sports.css";
         // 创建新实例
         window.sportsInstance = {
             timers: [],
-            processedActivities: []
+            processedActivities: [],
+            totalActivitiesDisplayed: false
         };
 
         // 为了数据的统一性,generateCalendar处理后赋值供全局使用
@@ -294,6 +308,10 @@ import "../styles/sports.css";
 
         // 显示总活动数和总公里数
         function displayTotalActivities(activities) {
+            // 防止重复执行
+            if (window.sportsInstance.totalActivitiesDisplayed) return;
+            window.sportsInstance.totalActivitiesDisplayed = true;
+            
             // 全年骑行时长
             const ridingTimeThisYear = document.getElementById('totalCount');
             // 全年骑行公里数
@@ -383,27 +401,33 @@ import "../styles/sports.css";
 
         // 动态更新计数器
         function animateCount(element, totalValue, duration, intervalDuration, isDistance = false) {
+            // 清除可能存在的之前的动画
+            if (element._animationInterval) {
+                clearInterval(element._animationInterval);
+            }
+            if (element._animationTimeout) {
+                clearTimeout(element._animationTimeout);
+            }
+            
             const step = totalValue / (duration / intervalDuration);
             let count = 0;
+            
             const interval = setInterval(() => {
                 count += step;
                 if (count >= totalValue) {
                     count = totalValue;
                     clearInterval(interval);
-                }
-                element.textContent = isDistance ? `${count.toFixed(2)} km` : `${count.toFixed(2)} h`;
-            }, intervalDuration);
-            window.sportsInstance.timers.push(interval);
-
-            // 在动画结束后，确保单位正确
-            const timer = setTimeout(() => {
-                if (isDistance) {
-                    element.textContent = `${totalValue.toFixed(2)} km`;
+                    element._animationInterval = null;
+                    // 确保最终值正确
+                    element.textContent = isDistance ? `${totalValue.toFixed(2)} km` : `${totalValue.toFixed(2)} h`;
                 } else {
-                    element.textContent = `${totalValue.toFixed(2)} h`;
+                    element.textContent = isDistance ? `${count.toFixed(2)} km` : `${count.toFixed(2)} h`;
                 }
-            }, duration);
-            window.sportsInstance.timers.push(timer);
+            }, intervalDuration);
+            
+            // 存储引用以便清理
+            element._animationInterval = interval;
+            window.sportsInstance.timers.push(interval);
         }
 
         // 柱形图交互
@@ -455,8 +479,7 @@ import "../styles/sports.css";
                 const activities = await loadActivityData();
                 // 显示4周的日历
                 generateCalendar(activities, startDate, 4);
-                // 显示全年骑行时长和公里数
-                displayTotalActivities(activities);
+                // 注意：displayTotalActivities 已在 generateCalendar 的回调中调用，这里不再重复调用
                 console.log('Sports 初始化完成');
             } catch (error) {
                 console.error('加载运动数据失败:', error);

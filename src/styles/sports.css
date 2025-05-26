@@ -42,14 +42,11 @@ html[data-theme="dark"] {
 /* base.scss */
 .container {
   display: flex;
-  justify-content: flex-start;
-  align-items: flex-start;
-  padding: 24px 0px 0px 0px;
-  gap: 73px;
+  margin: 24px auto 0px auto;
 }
 
 #totalActivities {
-  width: 182px;
+  width: 200px;
   height: 178px;
   display: flex;
   flex-direction: column;
@@ -128,8 +125,9 @@ html[data-theme="dark"] {
 .calendar {
   display: flex;
   flex-wrap: wrap;
-  max-width: 200px;
+  max-width: 245px;
   height: 178px;
+  margin-left: 42px;
 }
 
 .day-container {
@@ -261,6 +259,7 @@ html[data-theme="dark"] .cycling-kilometer {
   flex-direction: column;
   align-items: flex-start;
   height: 178px;
+  margin-left: 38px;
 }
 
 .icon-container {

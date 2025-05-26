@@ -111,7 +111,7 @@ const shouldShowExif = showExif && exif !== false;
       settings.push(deviceName);
     }
 
-    if (settings.length > 0) {
+    if (settings.length >= 6) {
       result.settings = settings.join(' · ');
     }
 
