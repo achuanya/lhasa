@@ -5,10 +5,14 @@ export interface Props {
   class?: string;
   style?: string;
   caption?: false | 'long' | 'short';
-  exif?: string;
+  exif?: string | false;
+  showExif?: boolean;
 }
 
-const { src, alt, class: className, style, caption = "long", exif } = Astro.props;
+const { src, alt, class: className, style, caption = "long", exif, showExif = true } = Astro.props;
+
+// 确定是否显示 EXIF
+const shouldShowExif = showExif && exif !== false;
 ---
 
 <figure class={`img-container ${className || ''}`} style={style}>
@@ -19,18 +23,21 @@ const { src, alt, class: className, style, caption = "long", exif } = Astro.prop
       title={alt} 
       loading="lazy" 
       class="img-main" 
-      data-exif-url={exif ? exif + "?exif" : undefined}
+      data-exif-url={shouldShowExif && typeof exif === 'string' ? exif + "?exif" : undefined}
+      data-show-exif={shouldShowExif}
     />
     {caption && (
       <figcaption class={`img-caption caption-${caption === 'long' ? 'bar' : 'tag'}`}>
         <span class="caption-text">{alt}</span>
       </figcaption>
     )}
-    <div class="exif-tooltip" data-exif-tooltip>
-      <div class="exif-content">
-        <div class="exif-loading">Loading EXIF data...</div>
+    {shouldShowExif && (
+      <div class="exif-tooltip" data-exif-tooltip>
+        <div class="exif-content">
+          <div class="exif-loading">Loading EXIF data...</div>
+        </div>
       </div>
-    </div>
+    )}
   </div>
 </figure>
 
@@ -174,7 +181,7 @@ const { src, alt, class: className, style, caption = "long", exif } = Astro.prop
     return `F/${aperture} · ${shutterSpeed}s · ISO ${iso} · ${focalLength}mm · sRGB · Auto WB · ${publishDate} · ${device}`;
   }
 
-  async function loadExifData(url: string, imageSrc: string): Promise<string> {
+  async function loadExifData(url: string, imageSrc: string, retryCount: number = 0): Promise<string> {
     try {
       const response = await fetch(url);
       if (!response.ok) throw new Error('Failed to fetch EXIF data');
@@ -190,14 +197,51 @@ const { src, alt, class: className, style, caption = "long", exif } = Astro.prop
       
       return result;
     } catch (error) {
-      // 加载失败时也生成模拟数据
+      // 重试逻辑：如果是第一次失败且有 exif URL，重试一次
+      if (retryCount === 0 && url.includes('?exif')) {
+        console.log('EXIF 加载失败，重试中...', error);
+        return loadExifData(url, imageSrc, 1);
+      }
+      
+      // 如果重试失败或者是使用 src 作为接口的情况，生成模拟数据
+      console.log('EXIF 加载最终失败，使用模拟数据', error);
+      return generateMockExifData(imageSrc);
+    }
+  }
+
+  async function loadExifFromSrc(imageSrc: string, retryCount: number = 0): Promise<string> {
+    try {
+      // 尝试使用图片 src 作为 EXIF 接口
+      const exifUrl = imageSrc + '?exif';
+      const response = await fetch(exifUrl);
+      if (!response.ok) throw new Error('Failed to fetch EXIF data from src');
+      
+      const data: ExifData = await response.json();
+      const processed = parseExifData(data);
+      const result = formatExifDisplay(processed);
+      
+      // 如果没有有效的 EXIF 数据，生成模拟数据
+      if (result === 'EXIF data unavailable') {
+        return generateMockExifData(imageSrc);
+      }
+      
+      return result;
+    } catch (error) {
+      // 重试逻辑：如果是第一次失败，重试一次
+      if (retryCount === 0) {
+        console.log('从 src 加载 EXIF 失败，重试中...', error);
+        return loadExifFromSrc(imageSrc, 1);
+      }
+      
+      // 重试失败，使用模拟数据
+      console.log('从 src 加载 EXIF 最终失败，使用模拟数据', error);
       return generateMockExifData(imageSrc);
     }
   }
 
   function initExifTooltips() {
-    // 选择所有图片，不管是否有 data-exif-url
-    const images = document.querySelectorAll('.img-main');
+    // 只选择需要显示 EXIF 的图片
+    const images = document.querySelectorAll('.img-main[data-show-exif="true"]');
     
     images.forEach((img) => {
       const exifUrl = img.getAttribute('data-exif-url');
@@ -220,11 +264,19 @@ const { src, alt, class: className, style, caption = "long", exif } = Astro.prop
           isLoading = true;
           const imageSrc = (img as HTMLImageElement).src;
           
-          // 如果有 exifUrl，尝试加载真实数据，否则直接使用模拟数据
+          // 根据优化后的逻辑加载 EXIF 数据
           if (exifUrl) {
-            exifDataCache = await loadExifData(exifUrl, imageSrc);
+            // 情况1：有 exif URL，优先使用，失败后重试，再失败使用 src 作为接口
+            try {
+              exifDataCache = await loadExifData(exifUrl, imageSrc);
+            } catch (error) {
+              // 如果 exif URL 完全失败，尝试使用 src 作为接口
+              console.log('exif URL 失败，尝试使用 src 作为接口');
+              exifDataCache = await loadExifFromSrc(imageSrc);
+            }
           } else {
-            exifDataCache = generateMockExifData(imageSrc);
+            // 情况2：没有 exif URL，直接使用 src 作为接口
+            exifDataCache = await loadExifFromSrc(imageSrc);
           }
           
           isLoading = false;
