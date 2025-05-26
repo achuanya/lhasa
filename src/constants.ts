@@ -6,6 +6,7 @@ import IconFacebook from "@/assets/icons/IconFacebook.svg";
 import IconTelegram from "@/assets/icons/IconTelegram.svg";
 import IconPinterest from "@/assets/icons/IconPinterest.svg";
 import IconDouyin from "@/assets/icons/IconDouyin.svg";
+import IconMastodon from "@/assets/icons/IconMastodon.svg";
 import { SITE } from "@/config";
 
 export const SOCIALS = [
@@ -20,6 +21,12 @@ export const SOCIALS = [
     href: "https://www.douyin.com/user/MS4wLjABAAAAKa6NwPUcIhC4qAwdvPjfGSyyENvEk1rGPBJVRQIQmCo",
     linkTitle: `${SITE.title} on Douyin`,
     icon: IconDouyin,
+  },
+  {
+    name: "Mastodon",
+    href: "https://mastodon.social/@lhasarider",
+    linkTitle: `${SITE.title} on Mastodon`,
+    icon: IconMastodon,
   },
   {
     name: "Telegram",

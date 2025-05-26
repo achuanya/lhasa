@@ -99,6 +99,9 @@ const structuredData = {
     <meta property="twitter:description" content={description} />
     <meta property="twitter:image" content={socialImageURL} />
 
+    <!-- Mastodon -->
+    <meta name="fediverse:creator" content="@lhasarider@mastodon.social">
+
     <!-- Google JSON-LD Structured data -->
     <script
       type="application/ld+json"
@@ -133,6 +136,17 @@ const structuredData = {
     <script is:inline src="/toggle-theme.js"></script>
     <link href="https://cos.lhasa.icu/assets/Artalk.css" rel="stylesheet" />
     <script is:inline src="https://cos.lhasa.icu/assets/Artalk.js"></script>
+    
+    <!-- 百度统计 -->
+    <script is:inline>
+      var _hmt = _hmt || [];
+      (function() {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?2f325d81a4b600b2b4be3c277d6fa88a";
+        var s = document.getElementsByTagName("script")[0]; 
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
   </head>
   <body>
     <slot />
