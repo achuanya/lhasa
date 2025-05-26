@@ -35,12 +35,12 @@ import Img from "@/components/Img.astro";
 
 配置好后又遇到麻烦了，字体太大了，一个字体文件17.9M！网站都脱垮了
 
-<Img src={`${IMAGES}/Textloading.jpg`} alt="网站被拖垮了" />
+<Img src={`${IMAGES}/Textloading.jpg`} alt="网站被拖垮了" exif={false} />
 
 这里做一下处理，取子集压缩文字，需要用到 [FontSmaller][1] 和 现代汉语常用3500汉字
 
 取子集压缩之后字体文件大小为1.94M
 
-<Img src={`${IMAGES}/Textloading2.png`} alt="取子集压缩后的效果" />
+<Img src={`${IMAGES}/Textloading2.png`} alt="取子集压缩后的效果" exif={false} />
 
 [1]: https://fontsmaller.github.io/
