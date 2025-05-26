@@ -92,7 +92,7 @@ import "../styles/sports.css";
         let processedActivities = [];
 
         // 日历
-        function generateCalendar(activities, startDate, numWeeks) {
+        function generateCalendar(activities, startDate, numWeeks, callback = null) {
             const calendarElement = document.getElementById('calendar');
             // 清空当前日历内容
             calendarElement.innerHTML = ''; 
@@ -196,10 +196,9 @@ import "../styles/sports.css";
                     }
                 }
             }
-            // 显示日历并在结束后显示柱形图和总活动数
+            // 显示日历并在结束后调用回调
             displayCalendar().then(() => {
-                generateBarChart();
-                displayTotalActivities(activities);
+                if (callback) callback();
             });
         }
 
@@ -477,14 +476,69 @@ import "../styles/sports.css";
 
             try {
                 const activities = await loadActivityData();
-                // 显示4周的日历
-                generateCalendar(activities, startDate, 4);
-                // 注意：displayTotalActivities 已在 generateCalendar 的回调中调用，这里不再重复调用
+                
+                // 从左到右依次加载：1. 总活动数据 -> 2. 日历 -> 3. 柱形图
+                await displayTotalActivitiesFirst(activities);
+                await generateCalendarWithDelay(activities, startDate, 4);
+                await generateBarChartWithDelay();
+                
                 console.log('Sports 初始化完成');
             } catch (error) {
                 console.error('加载运动数据失败:', error);
             }
         })();
+
+        // 首先显示总活动数据（左侧）
+        async function displayTotalActivitiesFirst(activities) {
+            return new Promise((resolve) => {
+                // 确保所有组件都是初始隐藏状态
+                const totalActivities = document.getElementById('totalActivities');
+                const calendar = document.getElementById('calendar');
+                const sports = document.querySelector('.sports');
+                
+                if (totalActivities) totalActivities.classList.remove('loaded');
+                if (calendar) calendar.classList.remove('loaded');
+                if (sports) sports.classList.remove('loaded');
+                
+                // 显示总活动数据
+                if (totalActivities) {
+                    totalActivities.classList.add('loaded');
+                }
+                
+                displayTotalActivities(activities);
+                
+                // 等待动画完成后继续
+                setTimeout(resolve, 800);
+            });
+        }
+
+        // 带延迟的日历生成（中间）
+        async function generateCalendarWithDelay(activities, startDate, numWeeks) {
+            return new Promise((resolve) => {
+                const calendar = document.getElementById('calendar');
+                if (calendar) {
+                    calendar.classList.add('loaded');
+                }
+                
+                // 生成日历
+                generateCalendar(activities, startDate, numWeeks, resolve);
+            });
+        }
+
+        // 带延迟的柱形图生成（右侧）
+        async function generateBarChartWithDelay() {
+            return new Promise((resolve) => {
+                const sports = document.querySelector('.sports');
+                if (sports) {
+                    sports.classList.add('loaded');
+                }
+                
+                setTimeout(() => {
+                    generateBarChart();
+                    resolve();
+                }, 300);
+            });
+        }
     }
 
     // 页面生命周期管理

@@ -51,6 +51,29 @@ html[data-theme="dark"] {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  opacity: 0;
+  transform: translateX(-30px);
+  transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out;
+}
+
+#calendar {
+  opacity: 0;
+  transform: translateX(-20px);
+  transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out;
+}
+
+.sports {
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out;
+}
+
+/* 加载完成后的状态 */
+#totalActivities.loaded,
+#calendar.loaded,
+.sports.loaded {
+  opacity: 1;
+  transform: translateX(0);
 }
 
 .total-title {
@@ -109,6 +132,25 @@ html[data-theme="dark"] {
     width: 100%;
     max-width: 600px;
     text-align: center;
+  }
+  
+  /* 移动端从上到下的滑入效果 */
+  #totalActivities {
+    transform: translateY(-30px);
+  }
+  
+  #calendar {
+    transform: translateY(-20px);
+  }
+  
+  .sports {
+    transform: translateY(-10px);
+  }
+  
+  #totalActivities.loaded,
+  #calendar.loaded,
+  .sports.loaded {
+    transform: translateY(0);
   }
   
   .icon-container {
