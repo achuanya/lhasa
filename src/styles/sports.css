@@ -170,6 +170,8 @@ html[data-theme="dark"] {
   max-width: 245px;
   height: 178px;
   margin-left: 42px;
+  overflow: visible; /* 允许球动画超出边界 */
+  position: relative;
 }
 
 .day-container {
@@ -182,7 +184,7 @@ html[data-theme="dark"] {
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  overflow: visible; /* 允许球从外部滚动进来 */
 }
 
 .calendar-week-header {
@@ -221,6 +223,125 @@ html[data-theme="dark"] {
   max-height: 30px;
 }
 
+/* 球滚动动画样式 */
+.activity-indicator.ball-rolling {
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  filter: brightness(1.1);
+}
+
+/* 不同方向的滚动效果增强 */
+.activity-indicator.roll-from-top {
+  animation: rollBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.activity-indicator.roll-from-right {
+  animation: rollSlide 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.activity-indicator.roll-from-bottom {
+  animation: rollBounceUp 0.65s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.activity-indicator.roll-from-left {
+  animation: rollSlideLeft 0.75s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* 增强的滚动动画关键帧 */
+@keyframes rollBounce {
+  0% {
+    transform: translate(-50%, -50%) scale(0.2) rotate(0deg);
+    opacity: 0;
+    filter: blur(2px);
+  }
+  30% {
+    transform: translate(-50%, -50%) scale(0.8) rotate(120deg);
+    opacity: 0.7;
+    filter: blur(1px);
+  }
+  60% {
+    transform: translate(-50%, -50%) scale(1.15) rotate(240deg);
+    opacity: 1;
+    filter: blur(0px);
+  }
+  80% {
+    transform: translate(-50%, -50%) scale(0.95) rotate(300deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1) rotate(360deg);
+    opacity: 1;
+  }
+}
+
+@keyframes rollSlide {
+  0% {
+    transform: translate(-50%, -50%) scale(0.3) rotate(0deg);
+    opacity: 0;
+    filter: blur(2px);
+  }
+  40% {
+    transform: translate(-50%, -50%) scale(0.9) rotate(180deg);
+    opacity: 0.8;
+    filter: blur(0.5px);
+  }
+  70% {
+    transform: translate(-50%, -50%) scale(1.1) rotate(270deg);
+    opacity: 1;
+    filter: blur(0px);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1) rotate(360deg);
+    opacity: 1;
+  }
+}
+
+@keyframes rollBounceUp {
+  0% {
+    transform: translate(-50%, -50%) scale(0.2) rotate(0deg);
+    opacity: 0;
+    filter: blur(2px);
+  }
+  35% {
+    transform: translate(-50%, -50%) scale(0.85) rotate(140deg);
+    opacity: 0.7;
+    filter: blur(1px);
+  }
+  65% {
+    transform: translate(-50%, -50%) scale(1.12) rotate(260deg);
+    opacity: 1;
+    filter: blur(0px);
+  }
+  85% {
+    transform: translate(-50%, -50%) scale(0.96) rotate(320deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1) rotate(360deg);
+    opacity: 1;
+  }
+}
+
+@keyframes rollSlideLeft {
+  0% {
+    transform: translate(-50%, -50%) scale(0.25) rotate(0deg);
+    opacity: 0;
+    filter: blur(2px);
+  }
+  45% {
+    transform: translate(-50%, -50%) scale(0.92) rotate(200deg);
+    opacity: 0.8;
+    filter: blur(0.5px);
+  }
+  75% {
+    transform: translate(-50%, -50%) scale(1.08) rotate(290deg);
+    opacity: 1;
+    filter: blur(0px);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1) rotate(360deg);
+    opacity: 1;
+  }
+}
+
 .day-container:hover .date-number {
   opacity: 1;
 }
@@ -245,6 +366,12 @@ html[data-theme="dark"] .activity-indicator {
 
 html[data-theme="dark"] .activity-indicator.no-activity {
   background-color: var(--accent);
+}
+
+/* 黑暗模式下的球滚动动画增强 */
+html[data-theme="dark"] .activity-indicator.ball-rolling {
+  box-shadow: 0 4px 12px rgba(255, 107, 1, 0.6);
+  filter: brightness(1.2) drop-shadow(0 0 4px var(--accent));
 }
 
 /* bar-chart.scss */

@@ -113,6 +113,53 @@ import "../styles/sports.css";
             processedActivities = [];
             let todayContainer = null;
 
+            // 添加球的滚动动画
+            function addBallRollAnimation(ball, container) {
+                // 定义四个方向的起始位置和动画参数
+                const directions = [
+                    { name: 'top', x: '50%', y: '-80px', rotate: 0, duration: 600 },
+                    { name: 'right', x: '150px', y: '50%', rotate: 90, duration: 700 },
+                    { name: 'bottom', x: '50%', y: '150px', rotate: 180, duration: 650 },
+                    { name: 'left', x: '-80px', y: '50%', rotate: 270, duration: 750 }
+                ];
+                
+                // 随机选择一个方向
+                const randomDirection = directions[Math.floor(Math.random() * directions.length)];
+                
+                // 设置初始位置（在容器外）
+                ball.style.left = randomDirection.x;
+                ball.style.top = randomDirection.y;
+                ball.style.transform = `translate(-50%, -50%) rotate(${randomDirection.rotate}deg) scale(0.3)`;
+                ball.style.transition = 'none';
+                ball.style.opacity = '0';
+                
+                // 添加滚动动画类
+                ball.classList.add('ball-rolling', `roll-from-${randomDirection.name}`);
+                
+                // 强制重绘
+                ball.offsetHeight;
+                
+                // 延迟一点时间后开始动画
+                setTimeout(() => {
+                    const duration = randomDirection.duration;
+                    ball.style.transition = `left ${duration}ms cubic-bezier(0.34, 1.56, 0.64, 1), top ${duration}ms cubic-bezier(0.34, 1.56, 0.64, 1), transform ${duration}ms cubic-bezier(0.34, 1.56, 0.64, 1), opacity ${duration * 0.3}ms ease-out`;
+                    ball.style.left = '50%';
+                    ball.style.top = '50%';
+                    ball.style.opacity = '1';
+                    
+                    // 添加旋转和弹跳效果
+                    const rotations = Math.floor(Math.random() * 2) + 1; // 1-2圈旋转
+                    ball.style.transform = `translate(-50%, -50%) rotate(${randomDirection.rotate + (360 * rotations)}deg) scale(1)`;
+                    
+                    // 动画完成后移除滚动类
+                    setTimeout(() => {
+                        ball.classList.remove('ball-rolling', `roll-from-${randomDirection.name}`);
+                        ball.style.transform = 'translate(-50%, -50%)';
+                        ball.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                    }, duration);
+                }, Math.random() * 100 + 50); // 随机延迟50-150ms
+            }
+
             // 创建日历
             function createDayContainer(date, activities) {
                 const dayContainer = document.createElement('div');
@@ -136,8 +183,14 @@ import "../styles/sports.css";
                 ball.style.width = `${ballSize}px`;
                 ball.style.height = `${ballSize}px`;
                 if (!activity) ball.classList.add('no-activity');
+                
+                // 设置球的最终位置
                 ball.style.left = '50%';
                 ball.style.top = '50%';
+                
+                // 添加随机方向的滚动动画
+                addBallRollAnimation(ball, dayContainer);
+                
                 dayContainer.appendChild(ball);
 
                 // 鼠标悬停动画
@@ -189,7 +242,7 @@ import "../styles/sports.css";
 
                         // 速度控制
                         await new Promise(resolve => {
-                            const timer = setTimeout(resolve, 30);
+                            const timer = setTimeout(resolve, 80);
                             window.sportsInstance.timers.push(timer);
                         });
                         currentDate.setUTCDate(currentDate.getUTCDate() + 1);
