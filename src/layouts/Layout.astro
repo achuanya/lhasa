@@ -137,16 +137,8 @@ const structuredData = {
     <link href="https://cos.lhasa.icu/assets/Artalk.css" rel="stylesheet" />
     <script is:inline src="https://cos.lhasa.icu/assets/Artalk.js"></script>
     
-    <!-- 百度统计 -->
-    <script is:inline>
-      var _hmt = _hmt || [];
-      (function() {
-        var hm = document.createElement("script");
-        hm.src = "https://hm.baidu.com/hm.js?2f325d81a4b600b2b4be3c277d6fa88a";
-        var s = document.getElementsByTagName("script")[0]; 
-        s.parentNode.insertBefore(hm, s);
-      })();
-    </script>
+    <!-- Cloudflare Web Analytics -->
+    <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "a014b4d3bc7c47dbb959e5133485184c"}'></script>
   </head>
   <body>
     <slot />
