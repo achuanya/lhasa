@@ -13,7 +13,7 @@ title: "About"
 
 ![游钓四方的骑行照](https://cos.lhasa.icu/StylePictures/my-photo.jpg_736 "游钓四方的骑行照")
 
-长途骑行小学生、野钓路亚、振出并继、古典乐、茶叶爱好者
+千禧年小孩、长途骑行小学生、野钓路亚、振出并继、古典乐、茶叶爱好者
 
 - Email: <haibao1027@gmail.com>
 - Github：<a href="https://github.com/achuanya" target="_blank">achuanya</a>
