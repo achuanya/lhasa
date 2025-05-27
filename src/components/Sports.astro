@@ -172,62 +172,70 @@ import "../styles/sports.css";
                 dateNumber.innerText = date.getUTCDate();
                 dayContainer.appendChild(dateNumber);
 
-                // 查找当前日期是否有活动数据
                 const activity = activities.find(activity => activity.start_date_local === date.toISOString().split('T')[0]);
-                // console.log(processedActivities);
                 if (activity) processedActivities.push(activity);
 
-                // 根据骑行距离设置球的大小
                 const ballSize = activity ? Math.min(parseFloat(activity.distance) / 4, 24) : 2;
-
                 const ball = document.createElement('div');
                 ball.className = 'activity-indicator';
                 ball.style.width = `${ballSize}px`;
                 ball.style.height = `${ballSize}px`;
                 if (!activity) ball.classList.add('no-activity');
                 
-                // 设置球的最终位置
-                ball.style.left = '50%';
-                ball.style.top = '50%';
-                
-                // 添加随机方向的滚动动画
-                addBallRollAnimation(ball, dayContainer);
-                
                 dayContainer.appendChild(ball);
+                addBallRollAnimation(ball, dayContainer);
 
-                // 设置初始状态：默认显示球，隐藏数字
-                dateNumber.style.opacity = '0';
-                ball.style.opacity = '1';
+                const isToday = date.toDateString() === new Date().toDateString();
+                let isAnimating = true;
 
-                // 如果是今天的日期，添加特定样式
-                if (date.toDateString() === new Date().toDateString()) {
-                    // 记录今天的日期
-                    todayContainer = dayContainer;
+                if (isToday) {
                     dayContainer.classList.add('today');
+                    todayContainer = dayContainer;
+                    dateNumber.style.opacity = '0'; // Initially hidden for animation
+                } else {
+                    dateNumber.style.opacity = '0'; // Hidden for other days during ball animation
+                }
+                
+                if (isToday) {
+                    dayContainer.addEventListener('mouseenter', () => {
+                        if (!isAnimating) {
+                            dateNumber.style.opacity = '0';
+                            ball.style.opacity = '1';
+                        }
+                    });
+                    dayContainer.addEventListener('mouseleave', () => {
+                        if (!isAnimating) {
+                            dateNumber.style.opacity = '1';
+                            ball.style.opacity = '0';
+                        }
+                    });
+                } else {
+                    dayContainer.addEventListener('mouseenter', () => {
+                        if (!isAnimating) {
+                            dateNumber.style.opacity = '1';
+                            ball.style.opacity = '0';
+                        }
+                    });
+                    dayContainer.addEventListener('mouseleave', () => {
+                        if (!isAnimating) {
+                            dateNumber.style.opacity = '0';
+                            ball.style.opacity = '1';
+                        }
+                    });
                 }
 
-                // 标记动画状态
-                let isAnimating = true;
-                
-                // 鼠标悬停动画 - 悬停时显示数字，隐藏球
-                dayContainer.addEventListener('mouseenter', () => {
-                    if (!isAnimating) {
-                        dateNumber.style.opacity = '1';
-                        ball.style.opacity = '0';
-                    }
-                });
-                
-                dayContainer.addEventListener('mouseleave', () => {
-                    if (!isAnimating) {
-                        dateNumber.style.opacity = '0';
-                        ball.style.opacity = '1';
-                    }
-                });
-
-                // 动画完成后允许鼠标交互
-                setTimeout(() => {
+                const postAnimationTimer = setTimeout(() => {
                     isAnimating = false;
-                }, 1000); // 给足够的时间让滚动动画完成
+                    if (isToday) {
+                        ball.style.opacity = '0'; // Hide ball for today's default
+                        dateNumber.style.transition = 'opacity 0.5s ease-in-out 0.2s'; // Add transition for number
+                        dateNumber.style.opacity = '1'; // Animate number in
+                    } else {
+                        dateNumber.style.opacity = '0'; // Ensure number hidden
+                        ball.style.opacity = '1';   // Ensure ball visible
+                    }
+                }, 1000); 
+                window.sportsInstance.timers.push(postAnimationTimer);
                 return dayContainer;
             }
 
