@@ -7,29 +7,64 @@ dayjs.extend(timezone);
 
 const calendarIconSvg = `
   <svg class="inline-block size-6 min-w-[1.375rem]" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect>
-    <line x1="16" x2="16" y1="2" y2="6"></line>
-    <line x1="8" x2="8" y1="2" y2="6"></line>
-    <line x1="3" x2="21" y1="10" y2="10"></line>
+    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+    <path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z" />
+    <path d="M16 3v4" />
+    <path d="M8 3v4" />
+    <path d="M4 11h16" />
+    <path d="M7 14h.013" />
+    <path d="M10.01 14h.005" />
+    <path d="M13.01 14h.005" />
+    <path d="M16.015 14h.005" />
+    <path d="M13.015 17h.005" />
+    <path d="M7.01 17h.005" />
+    <path d="M10.01 17h.005" />
   </svg>`;
 
-function formatFeedDate(dateString, tz) {
-  if (!dateString) return { iso: '', date: '', time: '' };
-  try {
-    // @ts-ignore
-    const datetime = dayjs(dateString).tz(tz || 'UTC');
-    return {
-      iso: datetime.toISOString(),
-      date: datetime.format('D MMM, YYYY'),
-      time: datetime.format('hh:mm A'),
-    };
-  } catch (e) {
-    return { iso: '', date: 'Invalid Date', time: '' };
-  }
-}
-
 function createFeedCardHTML(item, siteTimezone, fallbackOgImageGlobal) {
-  const pubDate = formatFeedDate(item.published, siteTimezone);
+  let displayDate = "";
+  let displayTime = "";
+  let isoTimestamp = "";
+
+  if (item.published && typeof item.published === 'string') {
+    const parts = item.published.split(" | ");
+    displayDate = parts[0]; // e.g., "26 May, 2025"
+    if (parts.length > 1) {
+      displayTime = parts[1]; // e.g., "01:20 PM"
+    }
+
+    // Construct a string that dayjs is likely to parse for the ISO timestamp
+    // Example: "26 May 2025 01:20 PM" (remove comma from date part for better parsing)
+    let parsableString = displayDate.replace(/,/g, ''); // "26 May 2025"
+    if (displayTime) {
+      parsableString += ` ${displayTime}`; // "26 May 2025 01:20 PM"
+    }
+    
+    try {
+      // @ts-ignore
+      const parsed = dayjs(parsableString, ["D MMM YYYY hh:mm A", "D MMM YYYY h:mm A", "D MMM YYYY"], true); // Added true for strict parsing
+      if (parsed.isValid()) {
+        // @ts-ignore
+        isoTimestamp = parsed.tz(siteTimezone || 'UTC').toISOString();
+      } else {
+        // Fallback for isoTimestamp if strict parsing fails
+        // Try parsing without format string, relying on dayjs's flexibility
+        // @ts-ignore
+        const lessStrictParse = dayjs(item.published.replace(" | ", " "));
+        if(lessStrictParse.isValid()){
+          // @ts-ignore
+          isoTimestamp = lessStrictParse.tz(siteTimezone || "UTC").toISOString();
+        } else {
+          console.warn("Failed to parse date for ISO timestamp:", item.published);
+        }
+      }
+    } catch (e) {
+      console.warn("Exception during date parsing for ISO timestamp:", item.published, e);
+    }
+  } else {
+    displayDate = "Date not available";
+  }
+
   const description = `By ${item.blog_name}`;
   const shortDescription = description.length > 40 ? description.substring(0, 40) + "..." : description;
 
@@ -66,10 +101,12 @@ function createFeedCardHTML(item, siteTimezone, fallbackOgImageGlobal) {
           ${calendarIconSvg}
           <span class="sr-only">Published:</span>
           <span class="text-sm italic">
-            <time datetime="${pubDate.iso}">${pubDate.date}</time>
+            <time datetime="${isoTimestamp}">${displayDate}</time>
+            ${displayTime ? `
             <span aria-hidden="true"> | </span>
             <span class="sr-only">&nbsp;at&nbsp;</span>
-            <span class="text-nowrap">${pubDate.time}</span>
+            <span class="text-nowrap">${displayTime}</span>
+            ` : ''}
           </span>
         </div>
         <p class="mt-2 text-sm text-gray-700 dark:text-gray-300 hidden sm:block">
