@@ -1,10 +1,10 @@
 import IconMail from "@/assets/icons/IconMail.svg";
 import IconGitHub from "@/assets/icons/IconGitHub.svg";
 import IconBrandX from "@/assets/icons/IconBrandX.svg";
-import IconWhatsapp from "@/assets/icons/IconWhatsapp.svg";
-import IconFacebook from "@/assets/icons/IconFacebook.svg";
+// import IconWhatsapp from "@/assets/icons/IconWhatsapp.svg";
+// import IconFacebook from "@/assets/icons/IconFacebook.svg";
 import IconTelegram from "@/assets/icons/IconTelegram.svg";
-import IconPinterest from "@/assets/icons/IconPinterest.svg";
+// import IconPinterest from "@/assets/icons/IconPinterest.svg";
 import IconDouyin from "@/assets/icons/IconDouyin.svg";
 import IconMastodon from "@/assets/icons/IconMastodon.svg";
 import { SITE } from "@/config";
