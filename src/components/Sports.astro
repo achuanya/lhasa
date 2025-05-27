@@ -17,7 +17,15 @@ import "../styles/sports.css";
           <div class="loading-spinner"></div>
       </div>
   </div>
-  <div id="calendar" class="calendar"></div>
+  <div id="calendar-wrapper" class="calendar-wrapper relative">
+    <button id="calendar-prev-btn" class="calendar-nav-btn prev-btn hidden absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-background/70 hover:bg-background/90 p-2 rounded-full shadow-md">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-left"><path d="m15 18-6-6 6-6"/></svg>
+    </button>
+    <div id="calendar" class="calendar"></div>
+    <button id="calendar-next-btn" class="calendar-nav-btn next-btn hidden absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-background/70 hover:bg-background/90 p-2 rounded-full shadow-md">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right"><path d="m9 18 6-6-6-6"/></svg>
+    </button>
+  </div>
   <div class="sports">
       <div class="icon-container">
           <div class="icon-item">
@@ -85,11 +93,19 @@ import "../styles/sports.css";
         window.sportsInstance = {
             timers: [],
             processedActivities: [],
-            totalActivitiesDisplayed: false
+            totalActivitiesDisplayed: false,
+            allActivities: [], // To store all fetched activities
+            currentCalendarOffsetWeeksBlocks: 0, // 0 for current, 1 for one 4-week block in past
+            currentCalendarViewStartDate: null, // Start date of the current 4-week calendar view
         };
 
         // 为了数据的统一性,generateCalendar处理后赋值供全局使用
-        let processedActivities = [];
+        // let processedActivities = []; // This is now part of window.sportsInstance
+
+        const calendarWrapper = document.getElementById('calendar-wrapper');
+        const prevCalBtn = document.getElementById('calendar-prev-btn');
+        const nextCalBtn = document.getElementById('calendar-next-btn');
+
 
         // 日历
         function generateCalendar(activities, startDate, numWeeks, callback = null) {
@@ -110,7 +126,8 @@ import "../styles/sports.css";
             currentDate.setUTCHours(0, 0, 0, 0);
 
             // 清空处理过的活动数据
-            processedActivities = [];
+            // processedActivities = []; // Now using window.sportsInstance.processedActivities
+            window.sportsInstance.processedActivities = [];
             let todayContainer = null;
 
             // 添加球的滚动动画
@@ -173,7 +190,7 @@ import "../styles/sports.css";
                 dayContainer.appendChild(dateNumber);
 
                 const activity = activities.find(activity => activity.start_date_local === date.toISOString().split('T')[0]);
-                if (activity) processedActivities.push(activity);
+                if (activity) window.sportsInstance.processedActivities.push(activity);
 
                 const ballSize = activity ? Math.min(parseFloat(activity.distance) / 4, 24) : 2;
                 const ball = document.createElement('div');
@@ -268,32 +285,31 @@ import "../styles/sports.css";
         // 生成柱形图
         function generateBarChart() {
             const barChartElement = document.getElementById('barChart');
-            // 清空柱形图内容
+            if (!barChartElement) return;
             barChartElement.innerHTML = '';
 
-            const today = getChinaTime();
-            const startDate = getStartDate(today, 21);
-
-            // 创建所有周的时间范围
-            const weeklyData = {};
-            let currentWeekStart = new Date(startDate);
-            currentWeekStart.setUTCHours(0, 0, 0, 0);
-
-            // 按周计算未来 4 周的日期范围
-            for (let i = 0; i < 4; i++) {
-                const weekStart = new Date(currentWeekStart);
-                const weekEnd = new Date(weekStart);
-                weekEnd.setUTCDate(weekStart.getUTCDate() + 6); // 一周结束日期为开始日期 +6 天
-                const weekKey = `${weekStart.toISOString().split('T')[0]} - ${weekEnd.toISOString().split('T')[0]}`;
-
-                weeklyData[weekKey] = 0; // 初始化每周骑行数据为 0
-                currentWeekStart.setUTCDate(currentWeekStart.getUTCDate() + 7); // 移动到下一周
+            const viewStartDate = window.sportsInstance.currentCalendarViewStartDate;
+            if (!viewStartDate) {
+                console.error("Bar chart cannot be generated, viewStartDate is not set.");
+                return;
             }
 
-            // 累加每周的骑行距离
-            processedActivities.forEach(activity => {
+            const weeklyData = {};
+            let currentWeekStartForIteration = new Date(viewStartDate);
+            currentWeekStartForIteration.setUTCHours(0, 0, 0, 0);
+
+            for (let i = 0; i < 4; i++) { // For the 4 weeks of the current calendar view
+                const weekStart = new Date(currentWeekStartForIteration);
+                const weekEnd = new Date(weekStart);
+                weekEnd.setUTCDate(weekStart.getUTCDate() + 6);
+                const weekKey = `${weekStart.toISOString().split('T')[0]} - ${weekEnd.toISOString().split('T')[0]}`;
+                weeklyData[weekKey] = 0;
+                currentWeekStartForIteration.setUTCDate(currentWeekStartForIteration.getUTCDate() + 7);
+            }
+            
+            window.sportsInstance.processedActivities.forEach(activity => {
                 const activityDate = new Date(activity.start_date_local);
-                const weekStart = getWeekStartDate(activityDate); // 活动所在周的开始日期
+                const weekStart = getWeekStartDate(activityDate); 
                 const weekEnd = new Date(weekStart);
                 weekEnd.setUTCDate(weekStart.getUTCDate() + 6);
 
@@ -303,22 +319,19 @@ import "../styles/sports.css";
                 }
             });
 
-            // 获取最大骑行距离（用于柱形图比例）
-            const maxDistance = Math.max(...Object.values(weeklyData), 0);
+            const maxDistance = Math.max(...Object.values(weeklyData).filter(val => typeof val === 'number' && !isNaN(val)), 0);
 
-            // 创建并显示每周的柱形图
             Object.keys(weeklyData).forEach(week => {
-                const distance = weeklyData[week]; // 当前周的骑行距离
+                const distance = weeklyData[week]; 
                 const barContainer = document.createElement('div');
                 barContainer.className = 'bar-container';
 
                 const bar = document.createElement('div');
                 bar.className = 'bar';
 
-                // 计算柱形图的宽度
                 const width = maxDistance > 0 ? (distance / maxDistance) * 190 : 0;
-                bar.style.setProperty('--bar-width', `${width}px`);
-
+                // bar.style.setProperty('--bar-width', `${width}px`); // CSS var method
+                
                 const distanceText = document.createElement('div');
                 distanceText.className = 'cycling-kilometer';
                 distanceText.innerText = '0 km';
@@ -332,15 +345,14 @@ import "../styles/sports.css";
                 barContainer.appendChild(messageBox);
                 barContainer.appendChild(clickMessageBox);
                 barChartElement.appendChild(barContainer);
-
-                // 动画效果：逐渐显示柱形图宽度
-                bar.style.width = '0';
-                bar.offsetHeight;
-                bar.style.transition = 'width 1s ease-out';
-                bar.style.width = `${width}px`;
+                
+                bar.style.width = '0'; // Start animation from 0 width
+                requestAnimationFrame(() => { // Ensure DOM is updated for transition
+                    bar.style.transition = 'width 1s ease-out';
+                    bar.style.width = `${width}px`;
+                });
 
                 distanceText.style.opacity = '1';
-                // 动态更新柱形图的数值
                 animateText(distanceText, 0, distance, 1000, true);
                 setupBarInteractions(bar, messageBox, clickMessageBox, distance);
             });
@@ -534,22 +546,95 @@ import "../styles/sports.css";
 
         // 加载数据并生成日历
         (async function() {
-            const today = getChinaTime();
-            const startDate = getStartDate(today, 21);
+            // const today = getChinaTime(); // Moved to triggerCalendarAndChartRender
+            // const startDate = getStartDate(today, 21); // Moved to triggerCalendarAndChartRender
 
             try {
                 const activities = await loadActivityData();
+                window.sportsInstance.allActivities = activities;
                 
-                // 从左到右依次加载：1. 总活动数据 -> 2. 日历 -> 3. 柱形图
-                await displayTotalActivitiesFirst(activities);
-                await generateCalendarWithDelay(activities, startDate, 4);
-                await generateBarChartWithDelay();
+                await displayTotalActivitiesFirst(activities); // Runs once
+                await triggerCalendarAndChartRender(true); // Initial render with animations
+
+                setupCalendarPaginationControls(); // Setup controls after first render
                 
                 console.log('Sports 初始化完成');
             } catch (error) {
                 console.error('加载运动数据失败:', error);
             }
         })();
+
+        function setupCalendarPaginationControls() {
+            if (!calendarWrapper || !prevCalBtn || !nextCalBtn || !window.sportsInstance) return;
+        
+            calendarWrapper.addEventListener('mouseenter', () => {
+                if (!window.sportsInstance) return;
+                prevCalBtn.classList.remove('hidden');
+                if (window.sportsInstance.currentCalendarOffsetWeeksBlocks > 0) {
+                    nextCalBtn.classList.remove('hidden');
+                }
+            });
+        
+            calendarWrapper.addEventListener('mouseleave', () => {
+                prevCalBtn.classList.add('hidden');
+                nextCalBtn.classList.add('hidden');
+            });
+        
+            prevCalBtn.addEventListener('click', async () => {
+                if (!window.sportsInstance) return;
+                window.sportsInstance.currentCalendarOffsetWeeksBlocks++;
+                await triggerCalendarAndChartRender(false); // Not initial load
+            });
+        
+            nextCalBtn.addEventListener('click', async () => {
+                if (!window.sportsInstance) return;
+                if (window.sportsInstance.currentCalendarOffsetWeeksBlocks > 0) {
+                    window.sportsInstance.currentCalendarOffsetWeeksBlocks--;
+                    await triggerCalendarAndChartRender(false); // Not initial load
+                }
+            });
+        }
+
+        function updatePaginationButtonsState() {
+            if (!nextCalBtn || !prevCalBtn || !window.sportsInstance) return;
+        
+            if (window.sportsInstance.currentCalendarOffsetWeeksBlocks === 0) {
+                nextCalBtn.classList.add('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+                nextCalBtn.disabled = true;
+                 // Hide next button explicitly if mouse is not over wrapper
+                if (!calendarWrapper.matches(':hover')) { // Check if mouse is NOT over wrapper
+                    nextCalBtn.classList.add('hidden');
+                }
+            } else {
+                nextCalBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+                nextCalBtn.disabled = false;
+                // If mouse is over wrapper, it might be shown by mouseenter logic
+            }
+            // prevCalBtn is generally always enabled unless a max historical limit is set
+            prevCalBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+            prevCalBtn.disabled = false;
+        }
+        
+
+        async function triggerCalendarAndChartRender(isInitialLoad = false) {
+            if (!window.sportsInstance) return;
+            const today = getChinaTime();
+            const daysToShift = window.sportsInstance.currentCalendarOffsetWeeksBlocks * 28; // 4 weeks per block
+            const currentDaysOffset = 21 + daysToShift;
+            
+            const viewStartDate = getStartDate(today, currentDaysOffset);
+            window.sportsInstance.currentCalendarViewStartDate = viewStartDate;
+        
+            const calendarEl = document.getElementById('calendar');
+            const barChartEl = document.getElementById('barChart');
+            if (calendarEl) calendarEl.innerHTML = ''; // Clear previous content
+            if (barChartEl) barChartEl.innerHTML = ''; // Clear previous content
+        
+            await generateCalendarWithDelay(window.sportsInstance.allActivities, viewStartDate, 4, isInitialLoad);
+            await generateBarChartWithDelay(isInitialLoad);
+            updatePaginationButtonsState();
+        }
+
 
         // 首先显示总活动数据（左侧）
         async function displayTotalActivitiesFirst(activities) {
@@ -576,30 +661,39 @@ import "../styles/sports.css";
         }
 
         // 带延迟的日历生成（中间）
-        async function generateCalendarWithDelay(activities, startDate, numWeeks) {
+        async function generateCalendarWithDelay(activities, startDate, numWeeks, isInitialLoad = false) {
             return new Promise((resolve) => {
                 const calendar = document.getElementById('calendar');
                 if (calendar) {
                     calendar.classList.add('loaded');
                 }
+                const delay = isInitialLoad ? 800 : 50; // Shorter delay for pagination
                 
-                // 生成日历
-                generateCalendar(activities, startDate, numWeeks, resolve);
+                setTimeout(() => {
+                     if (window.sportsInstance) { // Ensure instance exists
+                        generateCalendar(activities, startDate, numWeeks, resolve);
+                     } else {
+                         resolve(); // Resolve if instance is gone
+                     }
+                }, delay);
             });
         }
 
         // 带延迟的柱形图生成（右侧）
-        async function generateBarChartWithDelay() {
+        async function generateBarChartWithDelay(isInitialLoad = false) {
             return new Promise((resolve) => {
                 const sports = document.querySelector('.sports');
                 if (sports) {
                     sports.classList.add('loaded');
                 }
+                const delay = isInitialLoad ? 300 : 50; // Shorter delay for pagination
                 
                 setTimeout(() => {
-                    generateBarChart();
+                    if (window.sportsInstance) { // Ensure instance exists
+                        generateBarChart();
+                    }
                     resolve();
-                }, 300);
+                }, delay);
             });
         }
     }
