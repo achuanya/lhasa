@@ -68,18 +68,25 @@ html[data-theme="dark"] {
   transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out;
 }
 
+/* MODIFIED .sports style for pagination fix */
 .sports {
   opacity: 0;
-  transform: translateX(-10px);
-  transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out;
+  /* transform: translateX(-10px); */ /* REMOVED to prevent slide on pagination hide */
+  transition: opacity 0.6s ease-in-out; /* REMOVED transform from transition for general case */
 }
 
 /* 加载完成后的状态 */
 #totalActivities.loaded,
 #calendar.loaded,
-.sports.loaded {
+.sports.loaded { /* Combined .loaded styles */
   opacity: 1;
-  transform: translateX(0);
+  transform: translateX(0); /* This will apply to #totalActivities and #calendar */
+}
+
+/* Specifically for .sports.loaded, ensure transform is reset if it was ever set, or not applied if not needed */
+.sports.loaded {
+    opacity: 1;
+    transform: none; /* Or translateX(0) if it needs to counteract a specific initial transform not present anymore */
 }
 
 .total-title {
@@ -437,6 +444,12 @@ html[data-theme="dark"] .cycling-kilometer {
   align-items: center;
   gap: 20px;
   margin-bottom: 8px;
+  opacity: 0; /* Initially hidden */
+  transition: opacity 0.4s ease-in-out 0.3s; /* Fade in with a 0.3s delay relative to .sports.loaded */
+}
+
+.sports.loaded .icon-container {
+    opacity: 1; /* Become visible when .sports is loaded */
 }
 
 .icon-item {
@@ -536,4 +549,198 @@ html[data-theme="dark"] .click-message-box {
   color: var(--foreground);
   border: 1px solid var(--border);
   border-radius: 6px;
+}
+
+/* Ensure sports section has a transition for the .loaded class */
+/* These styles were previously in Sports.astro and are moved here */
+/* Note: .sports and .sports.loaded opacity transition is already handled at the top of this file */
+
+@keyframes totalStatsCrashBounce {
+  0% {
+    transform: translateX(500%); /* Increased: Start further off-screen to the right */
+    opacity: 0;
+  }
+  40% { /* Major impact and overshoot */
+    transform: translateX(-15%) scaleX(0.8) scaleY(1.2);
+    opacity: 1;
+  }
+  60% { /* First bounce back (right), overshoot */
+    transform: translateX(8%) scaleX(1.15) scaleY(0.9);
+  }
+  75% { /* Second bounce (left) */
+    transform: translateX(-4%) scaleX(0.95) scaleY(1.05);
+  }
+  90% { /* Third smaller bounce (right) */
+    transform: translateX(2%) scaleX(1.02) scaleY(0.98);
+  }
+  100% { /* Settle to final position */
+    transform: translateX(0%) scaleX(1) scaleY(1);
+    opacity: 1;
+  }
+}
+
+.total-activities-crash-bounce {
+  /* Animation duration and a more impactful easing function */
+  animation: totalStatsCrashBounce 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+}
+
+/* Add styles for .calendar-week-header if you want to ensure they are part of the layout flow correctly */
+.calendar-week-header {
+    /* Example: ensure they take up space and are centered, adjust as per your design */
+    text-align: center;
+    /* other styles like padding, font-size etc. */
+}
+
+/* Activity Details Popup Styles */
+.activity-details-popup {
+    position: absolute;
+    background-color: var(--background-color);
+    border: 1px solid var(--light-gray-border-color);
+    border-radius: 8px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+    padding: 12px 18px;
+    z-index: 1000;
+    width: 300px; /* Slightly wider for more content */
+    opacity: 0; 
+    transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+    transform: translateY(8px); 
+    font-size: 14px; /* Base font size for popup */
+}
+
+.activity-details-popup.loaded {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Arrow pointing up (when popup is below the element) */
+.activity-details-popup::before {
+    content: '';
+    position: absolute;
+    bottom: 100%; /* Position arrow at the top of the popup */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 8px solid var(--background-color);
+    filter: drop-shadow(0 -1px 1px rgba(0,0,0,0.05)); /* Subtle shadow for arrow */
+}
+
+/* Arrow pointing down (when popup is above the element) */
+.activity-details-popup.popup-above::before {
+    bottom: auto;
+    top: 100%;
+    border-bottom: none;
+    border-top: 8px solid var(--background-color);
+    filter: drop-shadow(0 1px 1px rgba(0,0,0,0.05));
+}
+
+.activity-details-popup h3 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    font-size: 1.2em; /* Slightly larger title */
+    color: var(--primary-color);
+    border-bottom: 1px solid var(--light-gray-border-color);
+    padding-bottom: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.activity-details-popup h3 svg { /* If using SVG icon in h3 */
+    margin-right: 8px;
+    width: 1.2em;
+    height: 1.2em;
+}
+
+.activity-details-popup p {
+    margin: 5px 0;
+    line-height: 1.6;
+    color: var(--gray-color);
+}
+
+.activity-details-popup p strong {
+    color: var(--primary-color);
+    margin-right: 5px;
+}
+
+.activity-details-popup .heart-rate-section {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--light-gray-border-color);
+}
+
+.activity-details-popup .heart-rate-section h4 {
+    margin-top: 0;
+    margin-bottom: 8px;
+    font-size: 1em;
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+}
+
+.activity-details-popup .strava-link {
+    margin-top: 12px;
+    text-align: right;
+}
+
+.activity-details-popup .close-btn {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    background: none;
+    border: none;
+    font-size: 1.8em; /* Slightly larger close button */
+    line-height: 1;
+    color: var(--gray-color);
+    cursor: pointer;
+    padding: 0;
+}
+
+/* Dark theme adjustments */
+html[data-theme="dark"] .activity-details-popup {
+    background-color: #2f3542; /* A custom dark color, adjust as needed */
+    border-color: #4a4a4a;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+}
+
+html[data-theme="dark"] .activity-details-popup::before {
+    border-bottom-color: #2f3542;
+     filter: drop-shadow(0 -1px 1px rgba(0,0,0,0.1));
+}
+html[data-theme="dark"] .activity-details-popup.popup-above::before {
+    border-top-color: #2f3542;
+    filter: drop-shadow(0 1px 1px rgba(0,0,0,0.1));
+}
+
+html[data-theme="dark"] .activity-details-popup h3 {
+    color: var(--accent-light, #bbe1fa);
+    border-bottom-color: #4a4a4a;
+}
+
+html[data-theme="dark"] .activity-details-popup p {
+    color: #bdc3c7; /* Lighter gray for text */
+}
+
+html[data-theme="dark"] .activity-details-popup p strong {
+    color: #e0e0e0; /* Even lighter for strong text */
+}
+
+html[data-theme="dark"] .activity-details-popup .heart-rate-section {
+    border-top-color: #4a4a4a;
+}
+html[data-theme="dark"] .activity-details-popup .heart-rate-section h4 {
+    color: var(--accent-light, #bbe1fa);
+}
+
+html[data-theme="dark"] .activity-details-popup .close-btn {
+    color: #bdc3c7;
+}
+
+html[data-theme="dark"] .activity-details-popup .close-btn:hover {
+    color: var(--accent-light, #bbe1fa);
+}
+
+html[data-theme="dark"] .activity-details-popup a {
+    color: var(--accent, #3282f7); /* Standard accent for links */
 }
