@@ -594,7 +594,7 @@ html[data-theme="dark"] .click-message-box {
 /* Activity Details Popup Styles */
 .activity-details-popup {
     position: absolute;
-    background-color: var(--background-color);
+    background-color: var(--popover, #fff); /* Changed for light mode */
     border: 1px solid var(--light-gray-border-color);
     border-radius: 8px;
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
@@ -623,7 +623,7 @@ html[data-theme="dark"] .click-message-box {
     height: 0;
     border-left: 8px solid transparent;
     border-right: 8px solid transparent;
-    border-bottom: 8px solid var(--background-color);
+    border-bottom: 8px solid var(--popover, #fff); /* Changed for light mode */
     filter: drop-shadow(0 -1px 1px rgba(0,0,0,0.05)); /* Subtle shadow for arrow */
 }
 
@@ -632,7 +632,7 @@ html[data-theme="dark"] .click-message-box {
     bottom: auto;
     top: 100%;
     border-bottom: none;
-    border-top: 8px solid var(--background-color);
+    border-top: 8px solid var(--popover, #fff); /* Changed for light mode */
     filter: drop-shadow(0 1px 1px rgba(0,0,0,0.05));
 }
 
