@@ -56,19 +56,41 @@ const shouldShowExif = showExif && exif !== false;
     const result: ProcessedExifData = {};
     const settings = [];
 
+    // Helper function to safely parse numeric values, including fractions
+    function safeParseFloat(value: string | undefined): number | null {
+      if (typeof value !== 'string') return null;
+      if (value.includes('/')) {
+        const parts = value.split('/');
+        if (parts.length === 2) {
+          const num = parseFloat(parts[0]);
+          const den = parseFloat(parts[1]);
+          if (!isNaN(num) && !isNaN(den) && den !== 0) {
+            return num / den;
+          }
+        }
+        return null;
+      }
+      const parsed = parseFloat(value);
+      return isNaN(parsed) ? null : parsed;
+    }
+
     // 光圈 F/1.7
     if (data.FNumber?.val) {
-      const aperture = eval(data.FNumber.val);
-      settings.push(`F/${aperture.toFixed(1)}`);
+      const aperture = safeParseFloat(data.FNumber.val);
+      if (aperture !== null) {
+        settings.push(`F/${aperture.toFixed(1)}`);
+      }
     }
     
     // 快门速度 1/714s
     if (data.ExposureTime?.val) {
-      const exposure = eval(data.ExposureTime.val);
-      if (exposure >= 1) {
-        settings.push(`${exposure.toFixed(1)}s`);
-      } else {
-        settings.push(`1/${Math.round(1/exposure)}s`);
+      const exposure = safeParseFloat(data.ExposureTime.val);
+      if (exposure !== null) {
+        if (exposure >= 1) {
+          settings.push(`${exposure.toFixed(1)}s`);
+        } else {
+          settings.push(`1/${Math.round(1/exposure)}s`);
+        }
       }
     }
     
@@ -79,8 +101,10 @@ const shouldShowExif = showExif && exif !== false;
 
     // 焦距 6.3mm
     if (data.FocalLength?.val) {
-      const focal = eval(data.FocalLength.val);
-      settings.push(`${focal.toFixed(1)}mm`);
+      const focal = safeParseFloat(data.FocalLength.val);
+      if (focal !== null) {
+        settings.push(`${focal.toFixed(1)}mm`);
+      }
     }
 
     // 色彩空间 sRGB

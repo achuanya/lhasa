@@ -5,14 +5,6 @@ import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import { SITE } from "@/config";
 
-interface FeedItem {
-  blog_name: string;
-  title: string;
-  published: string;
-  link: string;
-  avatar: string;
-}
-
 const INITIAL_ITEMS_TO_SHOW = 4;
 const FALLBACK_OG_IMAGE = "https://cos.lhasa.icu/LinksAvatar/default.png";
 
