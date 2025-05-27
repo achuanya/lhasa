@@ -80,27 +80,74 @@ function createFeedCardHTML(item, siteTimezone, fallbackOgImageGlobal) {
   `;
 }
 
-export function initFeeds(allFeedsFromServer, siteTimezone, fallbackOgImageGlobal, initialItemCount, itemsPerPage) {
+export async function initFeeds(siteTimezone, fallbackOgImageGlobal, initialItemCount, itemsPerPage, dataSourceUrl) {
   const feedsListElement = document.getElementById('feeds-list');
   const loadMoreTrigger = document.getElementById('load-more-trigger');
+  const loadingContainer = document.getElementById('feeds-loading');
+  const errorContainer = document.getElementById('feeds-error');
+  const noContentContainer = document.getElementById('feeds-no-content');
 
-  if (!feedsListElement) {
+  if (!feedsListElement || !loadingContainer || !errorContainer || !noContentContainer) {
+    console.error("Required DOM elements for feeds are missing.");
     return;
   }
-  
-  let currentIndex = initialItemCount;
 
-  function loadMoreItems() {
+  let allFeeds = [];
+  let currentIndex = 0; // Start with 0 as initial items will also be loaded by loadMoreItems
+  let observer;
+
+  async function fetchFeeds() {
+    try {
+      const response = await fetch(dataSourceUrl);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      allFeeds = data.items || []; // Ensure allFeeds is an array
+      loadingContainer.classList.add('hidden');
+
+      if (allFeeds.length === 0) {
+        noContentContainer.classList.remove('hidden');
+        if (loadMoreTrigger) loadMoreTrigger.style.display = 'none';
+        return;
+      }
+      
+      // Initial load of items
+      loadMoreItems(initialItemCount); 
+
+      // Setup Intersection Observer if there are more items than initially shown
+      if (loadMoreTrigger && allFeeds.length > initialItemCount) {
+        loadMoreTrigger.style.display = 'block'; // Show trigger if more items exist
+        observer = new IntersectionObserver((entries) => {
+          if (entries[0].isIntersecting) {
+            loadMoreItems(itemsPerPage);
+          }
+        }, { threshold: 0.1 });
+        observer.observe(loadMoreTrigger);
+      } else if (loadMoreTrigger) {
+        loadMoreTrigger.style.display = 'none';
+      }
+
+    } catch (e) {
+      console.error("Failed to fetch feeds:", e);
+      loadingContainer.classList.add('hidden');
+      errorContainer.classList.remove('hidden');
+      if (loadMoreTrigger) loadMoreTrigger.style.display = 'none';
+    }
+  }
+
+  function loadMoreItems(count) {
     if (!feedsListElement) {
         return;
     }
-    const itemsToLoad = allFeedsFromServer.slice(currentIndex, currentIndex + itemsPerPage);
+    const itemsToLoad = allFeeds.slice(currentIndex, currentIndex + count);
 
-    if (itemsToLoad.length === 0 && loadMoreTrigger) {
-      loadMoreTrigger.style.display = 'none'; 
+    if (itemsToLoad.length === 0) {
+      if (loadMoreTrigger) loadMoreTrigger.style.display = 'none'; 
       if (observer) {
         observer.disconnect();
       }
+      // If it's the initial load and no items, noContentContainer would have been shown by fetchFeeds
       return;
     }
 
@@ -111,23 +158,13 @@ export function initFeeds(allFeedsFromServer, siteTimezone, fallbackOgImageGloba
     feedsListElement.insertAdjacentHTML('beforeend', newItemsHTML);
     currentIndex += itemsToLoad.length;
 
-    if (currentIndex >= allFeedsFromServer.length && loadMoreTrigger) {
-        loadMoreTrigger.style.display = 'none';
+    if (currentIndex >= allFeeds.length) {
+        if (loadMoreTrigger) loadMoreTrigger.style.display = 'none';
         if(observer) {
             observer.disconnect();
         }
     }
   }
 
-  let observer;
-  if (loadMoreTrigger && allFeedsFromServer.length > initialItemCount) {
-    observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting) {
-        loadMoreItems();
-      }
-    }, { threshold: 0.1 });
-    observer.observe(loadMoreTrigger);
-  } else if (loadMoreTrigger) {
-    loadMoreTrigger.style.display = 'none';
-  }
+  await fetchFeeds();
 } 

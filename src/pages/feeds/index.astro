@@ -3,7 +3,6 @@ import Layout from "@/layouts/Layout.astro";
 import Main from "@/layouts/Main.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
-import Datetime from "@/components/Datetime.astro";
 import { SITE } from "@/config";
 
 interface FeedItem {
@@ -14,100 +13,36 @@ interface FeedItem {
   avatar: string;
 }
 
-interface FeedsData {
-  items: FeedItem[];
-  updated: string;
-}
-
 const INITIAL_ITEMS_TO_SHOW = 4;
 const FALLBACK_OG_IMAGE = "https://cos.lhasa.icu/LinksAvatar/default.png";
 
-let allFeedsData: FeedsData = { items: [], updated: "" };
-let errorFetching: string | null = null;
-
-try {
-  const response = await fetch("https://cos.lhasa.icu/lhasaRSS/data.json");
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-  allFeedsData = await response.json();
-} catch (e) {
-  if (e instanceof Error) {
-    errorFetching = `Failed to fetch feeds: ${e.message}`;
-  } else {
-    errorFetching = "An unknown error occurred while fetching feeds.";
-  }
-}
-
 const feedsDataForClient = {
-  allFeeds: allFeedsData.items,
   siteTimezone: SITE.timezone,
   fallbackOgImage: FALLBACK_OG_IMAGE,
   initialItemCount: INITIAL_ITEMS_TO_SHOW,
   itemsPerPage: 4,
+  dataSourceUrl: "https://cos.lhasa.icu/lhasaRSS/data.json"
 };
 ---
 
 <Layout title={`Feeds | ${SITE.title}`}>
   <Header />
     <Main pageTitle="Feeds" pageDesc="">
-    {errorFetching && (
-      <div class="mb-4 rounded bg-red-100 p-4 text-red-700">
-        <p>{errorFetching}</p>
-        <p>Please check the data source or network connection.</p>
-      </div>
-    )}
-    {allFeedsData.items && allFeedsData.items.length > 0 ? (
       <section id="feeds-list-section" class="px-0">
+        <div id="feeds-loading" class="my-6 text-center">
+          <p>正在加载 Feeds...</p>
+        </div>
+        <div id="feeds-error" class="my-6 text-center text-red-700 hidden">
+          <p>加载 Feeds 失败，请稍后重试或检查网络连接。</p>
+        </div>
+        <div id="feeds-no-content" class="my-6 text-center hidden">
+          <p>暂无内容。</p>
+        </div>
         <ul id="feeds-list" class="list-none p-0">
-          {allFeedsData.items.slice(0, feedsDataForClient.initialItemCount).map(item => {
-            const imgSrc = item.avatar || FALLBACK_OG_IMAGE;
-            const description = `By ${item.blog_name}`;
-            const shortDescription = description.length > 40 ? description.substring(0, 40) + "..." : description;
-            
-            return (
-              <li class="my-6 flex flex-row gap-6 items-start">
-                {imgSrc && (
-                  <a href={item.link} target="_blank" rel="noopener noreferrer" class="shrink-0 mx-auto my-auto">
-                    <img
-                      src={imgSrc}
-                      alt={item.title}
-                      class="w-[76px] sm:w-[81.78px] h-auto object-cover rounded-md aspect-square group-hover:opacity-90 transition-opacity duration-300"
-                      loading="lazy"
-                      onerror={`this.onerror=null; this.src='${FALLBACK_OG_IMAGE}';`}
-                    />
-                  </a>
-                )}
-                <div class="flex-grow mx-auto my-auto">
-                  <a
-                    href={item.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="inline-block text-lg font-medium text-accent decoration-dashed underline-offset-4 focus-visible:no-underline focus-visible:underline-offset-0"
-                  >
-                    <h3 class="text-lg font-medium decoration-dashed hover:underline">{item.title}</h3>
-                  </a>
-                  <Datetime 
-                    pubDatetime={new Date(item.published)} 
-                    modDatetime={null} 
-                    timezone={SITE.timezone} 
-                  />
-                  <p class="mt-2 text-sm text-gray-700 dark:text-gray-300 hidden sm:block">
-                    {shortDescription}
-                  </p>
-                </div>
-              </li>
-            );
-          })}
         </ul>
-        {allFeedsData.items.length > feedsDataForClient.initialItemCount && (
-          <div id="load-more-trigger" class="h-10"></div>
-        )}
+        <div id="load-more-trigger" class="h-10" style="display: none;"></div>
       </section>
-    ) : (
-      !errorFetching && <p>暂无内容。</p>
-    )}
-  </Main>
+    </Main>
   <Footer />
 </Layout>
 
@@ -123,14 +58,18 @@ const feedsDataForClient = {
       try {
         const clientData = JSON.parse(dataElement.dataset.json);
         initFeeds(
-          clientData.allFeeds,
           clientData.siteTimezone,
           clientData.fallbackOgImage,
           clientData.initialItemCount,
-          clientData.itemsPerPage
+          clientData.itemsPerPage,
+          clientData.dataSourceUrl
         );
       } catch (e) {
         console.error("Failed to parse feeds client data or initialize feeds:", e);
+        const errorContainer = document.getElementById('feeds-error');
+        const loadingContainer = document.getElementById('feeds-loading');
+        if (errorContainer) errorContainer.classList.remove('hidden');
+        if (loadingContainer) loadingContainer.classList.add('hidden');
       }
     }
   });
