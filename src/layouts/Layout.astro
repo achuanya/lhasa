@@ -137,9 +137,16 @@ const structuredData = {
     <link href="https://cos.lhasa.icu/assets/Artalk.css" rel="stylesheet" />
     <script is:inline src="https://cos.lhasa.icu/assets/Artalk.js"></script>
     
-    <!-- Plausible -->
-    <script is:inline defer data-domain="lhasa.icu" src="https://plausible.lhasa.icu/js/script.file-downloads.hash.outbound-links.pageview-props.tagged-events.js"></script>
-    <script is:inline>window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }</script>
+    <!-- Baidu Analytics -->
+    <script defer is:inline>
+      var _hmt = _hmt || [];
+      (function() {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?2f325d81a4b600b2b4be3c277d6fa88a";
+        var s = document.getElementsByTagName("script")[0]; 
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
   </head>
   <body>
     <slot />
