@@ -5,19 +5,11 @@ title: "About"
 
 自 <span id="start-year" class="font-bold text-accent">0</span> 年 <span id="start-month" class="font-bold text-accent">0</span> 月 <span id="start-day" class="font-bold text-accent">0</span> 日起，本站已运行 <span id="running-days" class="font-bold text-accent">0</span> 天，截至到今天，共写了博文 <span id="total-posts" class="font-bold text-accent">0</span> 篇，计 <span id="total-words" class="font-bold text-accent">0.0</span> 万字。
 
-鄙人博客采用:<a href="https://creativecommons.org/licenses/by-nc-nd/3.0/deed.zh-hans" target="_blank">CC BY-NC-ND 4.0</a>，转载请务必注明出处，谢谢。
-
-内容系本人学习、研究和总结，如有雷同，实属荣幸！
-
 ## 博主
-
-![游钓四方的骑行照](https://cos.lhasa.icu/StylePictures/my-photo.jpg_736 "游钓四方的骑行照")
 
 千禧年小孩、长途骑行小学生、野钓路亚、振出并继、古典乐、茶叶爱好者
 
-- Email: <haibao1027@gmail.com>
-- Github：<a href="https://github.com/achuanya" target="_blank">achuanya</a>
-- 微信公众号：游钓四方的博客
+![游钓四方的骑行照](https://cos.lhasa.icu/StylePictures/my-photo.jpg_736 "游钓四方的骑行照")
 
 ![游钓四方的微信公众号](https://cos.lhasa.icu/StylePictures/WechatPublicAccount.jpg "生活中从不缺少美，而是缺少发现美的眼睛")
 
@@ -39,7 +31,15 @@ title: "About"
 
 ## LICENSE
 
-GNU GENERAL PUBLIC LICENSE
-Version 3, 29 June 2007
+本博客前端源码基于 <a href="https://github.com/satnaing/astro-paper" target="_blank" rel="noopener noreferrer">astro-paper</a> 项目构建，遵循 MIT License 发布：
 
-Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>
+> Copyright (c) 2023 Sat Naing  
+> 本软件可自由使用、复制、修改、分发，前提是保留原始版权声明。  
+> 软件按“原样”提供，不附带任何明示或暗示的担保。
+
+本人对原项目进行了定制与扩展，包括样式调整、组件重构、功能拓展等。
+
+博客中发布的文字内容（包括博文、页面介绍等）采用  
+> <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/deed.zh-hans" target="_blank" rel="noopener noreferrer">CC BY-NC-ND 4.0 国际许可协议</a>，转载请务必注明出处，禁止商用及修改。
+
+内容系本人学习、研究和总结，如有雷同，实属荣幸！
