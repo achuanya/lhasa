@@ -409,12 +409,9 @@ import "../styles/sports.css";
                 <p><strong>🚴‍♀️ 平均速度:</strong> ${avgSpeedKmh}</p>
                 <p><strong>💨 最高速度:</strong> ${maxSpeedKmh}</p>
                 <p><strong>⛰️ 总爬升:</strong> ${totalElevationGain}</p>
+                <p><strong>💓 平均心率:</strong> ${avgHeartrate}</p>
+                <p><strong>💥 最高心率:</strong> ${maxHeartrate}</p>
                 <p><strong>🔥 卡路里:</strong> ${calories}</p>
-                <div class="heart-rate-section">
-                    <h4>❤️ 心率数据</h4>
-                    <p><strong>💓 平均心率:</strong> ${avgHeartrate}</p>
-                    <p><strong>💥 最高心率:</strong> ${maxHeartrate}</p>
-                </div>
                 ${activity.id ? `<p class="strava-link"><a href="https://www.strava.com/activities/${activity.id}" target="_blank" rel="noopener noreferrer">在 Strava 查看</a></p>` : ''}
             `;
 
